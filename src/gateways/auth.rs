@@ -79,6 +79,24 @@ impl AuthService for Service {
             Err(Status::invalid_argument("Invalid code"))
         }
     }
+
+    async fn validate_token(&self, request: Request<ValidateTokenRequest>) -> Result<Response<ValidateTokenResponse>, Status> {
+        let request = request.into_inner();
+        validate_token_request(&request).map_err(|e| Status::invalid_argument(e.to_string()))?;
+
+        let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
+        let token = decode::<Claims>(&request.token, &DecodingKey::from_secret(secret.as_ref()), &Validation::default());
+
+        if token.is_err() {
+            return Err(Status::invalid_argument("Invalid token"));
+        }
+
+        println!("{:?}", token);
+
+        Ok(Response::new(ValidateTokenResponse {
+            valid: true,
+        }))
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
