@@ -1,15 +1,14 @@
 // @generated
 /// Generated client implementations.
-pub mod auth_client {
+pub mod auth_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
     use tonic::codegen::http::Uri;
-    ///
     #[derive(Debug, Clone)]
-    pub struct AuthClient<T> {
+    pub struct AuthServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl AuthClient<tonic::transport::Channel> {
+    impl AuthServiceClient<tonic::transport::Channel> {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -20,7 +19,7 @@ pub mod auth_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> AuthClient<T>
+    impl<T> AuthServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
@@ -38,7 +37,7 @@ pub mod auth_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> AuthClient<InterceptedService<T, F>>
+        ) -> AuthServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
@@ -52,7 +51,7 @@ pub mod auth_client {
                 http::Request<tonic::body::BoxBody>,
             >>::Error: Into<StdError> + Send + Sync,
         {
-            AuthClient::new(InterceptedService::new(inner, interceptor))
+            AuthServiceClient::new(InterceptedService::new(inner, interceptor))
         }
         /// Compress requests with the given encoding.
         ///
@@ -85,11 +84,13 @@ pub mod auth_client {
             self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
-        ///
         pub async fn register(
             &mut self,
             request: impl tonic::IntoRequest<super::RegisterRequest>,
-        ) -> std::result::Result<tonic::Response<super::Token>, tonic::Status> {
+        ) -> std::result::Result<
+            tonic::Response<super::RegisterResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -100,16 +101,17 @@ pub mod auth_client {
                     )
                 })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/auth.Auth/Register");
+            let path = http::uri::PathAndQuery::from_static(
+                "/auth.AuthService/Register",
+            );
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new("auth.Auth", "Register"));
+            req.extensions_mut().insert(GrpcMethod::new("auth.AuthService", "Register"));
             self.inner.unary(req, path, codec).await
         }
-        ///
         pub async fn login(
             &mut self,
             request: impl tonic::IntoRequest<super::LoginRequest>,
-        ) -> std::result::Result<tonic::Response<super::Token>, tonic::Status> {
+        ) -> std::result::Result<tonic::Response<super::LoginResponse>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -120,34 +122,66 @@ pub mod auth_client {
                     )
                 })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/auth.Auth/Login");
+            let path = http::uri::PathAndQuery::from_static("/auth.AuthService/Login");
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new("auth.Auth", "Login"));
+            req.extensions_mut().insert(GrpcMethod::new("auth.AuthService", "Login"));
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn validate_otp(
+            &mut self,
+            request: impl tonic::IntoRequest<super::ValidateOtpRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ValidateOtpResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/auth.AuthService/ValidateOTP",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("auth.AuthService", "ValidateOTP"));
             self.inner.unary(req, path, codec).await
         }
     }
 }
 /// Generated server implementations.
-pub mod auth_server {
+pub mod auth_service_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with AuthServer.
+    /// Generated trait containing gRPC methods that should be implemented for use with AuthServiceServer.
     #[async_trait]
-    pub trait Auth: Send + Sync + 'static {
-        ///
+    pub trait AuthService: Send + Sync + 'static {
         async fn register(
             &self,
             request: tonic::Request<super::RegisterRequest>,
-        ) -> std::result::Result<tonic::Response<super::Token>, tonic::Status>;
-        ///
+        ) -> std::result::Result<
+            tonic::Response<super::RegisterResponse>,
+            tonic::Status,
+        >;
         async fn login(
             &self,
             request: tonic::Request<super::LoginRequest>,
-        ) -> std::result::Result<tonic::Response<super::Token>, tonic::Status>;
+        ) -> std::result::Result<tonic::Response<super::LoginResponse>, tonic::Status>;
+        async fn validate_otp(
+            &self,
+            request: tonic::Request<super::ValidateOtpRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ValidateOtpResponse>,
+            tonic::Status,
+        >;
     }
-    ///
     #[derive(Debug)]
-    pub struct AuthServer<T: Auth> {
+    pub struct AuthServiceServer<T: AuthService> {
         inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
@@ -155,7 +189,7 @@ pub mod auth_server {
         max_encoding_message_size: Option<usize>,
     }
     struct _Inner<T>(Arc<T>);
-    impl<T: Auth> AuthServer<T> {
+    impl<T: AuthService> AuthServiceServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
@@ -207,9 +241,9 @@ pub mod auth_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for AuthServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for AuthServiceServer<T>
     where
-        T: Auth,
+        T: AuthService,
         B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
@@ -225,12 +259,14 @@ pub mod auth_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/auth.Auth/Register" => {
+                "/auth.AuthService/Register" => {
                     #[allow(non_camel_case_types)]
-                    struct RegisterSvc<T: Auth>(pub Arc<T>);
-                    impl<T: Auth> tonic::server::UnaryService<super::RegisterRequest>
+                    struct RegisterSvc<T: AuthService>(pub Arc<T>);
+                    impl<
+                        T: AuthService,
+                    > tonic::server::UnaryService<super::RegisterRequest>
                     for RegisterSvc<T> {
-                        type Response = super::Token;
+                        type Response = super::RegisterResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
@@ -241,7 +277,7 @@ pub mod auth_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as Auth>::register(&inner, request).await
+                                <T as AuthService>::register(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -269,12 +305,12 @@ pub mod auth_server {
                     };
                     Box::pin(fut)
                 }
-                "/auth.Auth/Login" => {
+                "/auth.AuthService/Login" => {
                     #[allow(non_camel_case_types)]
-                    struct LoginSvc<T: Auth>(pub Arc<T>);
-                    impl<T: Auth> tonic::server::UnaryService<super::LoginRequest>
+                    struct LoginSvc<T: AuthService>(pub Arc<T>);
+                    impl<T: AuthService> tonic::server::UnaryService<super::LoginRequest>
                     for LoginSvc<T> {
-                        type Response = super::Token;
+                        type Response = super::LoginResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
@@ -285,7 +321,7 @@ pub mod auth_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as Auth>::login(&inner, request).await
+                                <T as AuthService>::login(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -298,6 +334,52 @@ pub mod auth_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = LoginSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/auth.AuthService/ValidateOTP" => {
+                    #[allow(non_camel_case_types)]
+                    struct ValidateOTPSvc<T: AuthService>(pub Arc<T>);
+                    impl<
+                        T: AuthService,
+                    > tonic::server::UnaryService<super::ValidateOtpRequest>
+                    for ValidateOTPSvc<T> {
+                        type Response = super::ValidateOtpResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::ValidateOtpRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as AuthService>::validate_otp(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = ValidateOTPSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
@@ -328,7 +410,7 @@ pub mod auth_server {
             }
         }
     }
-    impl<T: Auth> Clone for AuthServer<T> {
+    impl<T: AuthService> Clone for AuthServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -340,7 +422,7 @@ pub mod auth_server {
             }
         }
     }
-    impl<T: Auth> Clone for _Inner<T> {
+    impl<T: AuthService> Clone for _Inner<T> {
         fn clone(&self) -> Self {
             Self(Arc::clone(&self.0))
         }
@@ -350,7 +432,7 @@ pub mod auth_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: Auth> tonic::server::NamedService for AuthServer<T> {
-        const NAME: &'static str = "auth.Auth";
+    impl<T: AuthService> tonic::server::NamedService for AuthServiceServer<T> {
+        const NAME: &'static str = "auth.AuthService";
     }
 }
