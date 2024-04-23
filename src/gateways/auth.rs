@@ -1,12 +1,10 @@
-use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use tonic::{Request, Response, Status};
 use diesel::PgConnection;
-use tonic::transport::Server;
 
 use protos::auth::{auth_server::Auth, RegisterRequest, Token, LoginRequest};
-use protos::auth::auth_server::AuthServer;
 use crate::models::{user::{User, NewUser}};
+
 pub struct AuthService {
     database: Arc<Mutex<PgConnection>>
 }
@@ -28,7 +26,7 @@ impl Auth for AuthService {
             email: &request.email,
         };
 
-        let user = User::create(&mut conn.unwrap(), user)
+        let _user = User::create(&mut conn.unwrap(), user)
             .map_err(|_| Status::already_exists("User already exists"))?;
 
         Ok(Response::new(Token {

@@ -22,6 +22,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let database = connect_db();
     let addr = "[::1]:50051".parse()?;
 
+    println!("Server listening on {}", addr);
+
     Server::builder()
         .add_service(AuthServer::new(gateways::auth::AuthService::new(database)))
         .serve(addr)
