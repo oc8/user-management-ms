@@ -3,11 +3,19 @@ use std::env;
 use diesel::{Connection, PgConnection};
 use dotenvy::dotenv;
 use tonic::transport::Server;
-use protos::auth::auth_server::AuthServer;
+use protos::auth::auth_service_server::AuthServiceServer;
 
 mod gateways;
 mod schema;
 mod models;
+mod validations;
+
+// mod proto {
+//     tonic::include_proto!("auth");
+//
+//     pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
+//         tonic::include_file_descriptor_set!("auth_descriptor");
+// }
 
 pub fn connect_db() -> PgConnection {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -25,7 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Server listening on {}", addr);
 
     Server::builder()
-        .add_service(AuthServer::new(gateways::auth::AuthService::new(database)))
+        .add_service(AuthServiceServer::new(gateways::auth::Service::new(database)))
         .serve(addr)
         .await?;
 

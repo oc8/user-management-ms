@@ -11,12 +11,10 @@ use crate::schema::users;
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct User {
     pub id: Uuid,
-    pub firstname: String,
-    pub lastname: String,
     pub email: String,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[diesel(table_name = users)]
 pub struct NewUser<'a> {
     pub email: &'a str,
