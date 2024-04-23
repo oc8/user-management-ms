@@ -3,6 +3,7 @@ use std::env;
 use diesel::{Connection, PgConnection};
 use dotenvy::dotenv;
 use tonic::transport::Server;
+use totp_rs::{Algorithm, Secret, TOTP};
 use protos::auth::auth_service_server::AuthServiceServer;
 
 mod gateways;
@@ -32,8 +33,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Server listening on {}", addr);
 
+    let opt_secret = env::var("OTP_SECRET").expect("OTP_SECRET must be set");
+    let totp = TOTP::new(Algorithm::SHA1, 6, 1, 60, Secret::Encoded(opt_secret).to_bytes().unwrap(), None, "".to_string()).unwrap();
+
     Server::builder()
-        .add_service(AuthServiceServer::new(gateways::auth::Service::new(database)))
+        .add_service(AuthServiceServer::new(gateways::auth::Service::new(
+            database,
+            totp
+        )))
         .serve(addr)
         .await?;
 

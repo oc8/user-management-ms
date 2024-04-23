@@ -1,22 +1,28 @@
 use std::env;
 use std::sync::{Arc, Mutex};
+use std::time::{SystemTime, UNIX_EPOCH};
+use chrono::Utc;
 use tonic::{Request, Response, Status};
 use diesel::PgConnection;
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 
-use protos::auth::{auth_service_server::AuthService, RegisterRequest, Tokens, LoginRequest, RegisterResponse, LoginResponse, ValidateOtpRequest, ValidateOtpResponse};
+use protos::auth::{auth_service_server::AuthService, RegisterRequest, Tokens, LoginRequest, RegisterResponse, LoginResponse, ValidateOtpRequest, ValidateOtpResponse, ValidateTokenRequest, ValidateTokenResponse};
 use serde::{Deserialize, Serialize};
+use totp_rs::{TOTP};
 use uuid::Uuid;
 use crate::models::{user::{User, NewUser}};
-use crate::validations::{validate_register_request, validate_login_request};
+use crate::validations::{validate_register_request, validate_login_request, validate_token_request, validate_otp_request};
 
 pub struct Service {
-    database: Arc<Mutex<PgConnection>>
+    database: Arc<Mutex<PgConnection>>,
+    totp: TOTP
 }
 
 impl Service {
-    pub fn new(database: PgConnection) -> Self {
+    pub fn new(database: PgConnection, totp: TOTP) -> Self {
         Self {
             database: Arc::new(Mutex::new(database)),
+            totp
         }
     }
 }
@@ -43,14 +49,35 @@ impl AuthService for Service {
         let request = request.into_inner();
         validate_login_request(&request).map_err(|e| Status::invalid_argument(e.to_string()))?;
 
-        let user = User::find_by_email(&mut conn.unwrap(), &request.email)
+        User::find_by_email(&mut conn.unwrap(), &request.email)
             .ok_or_else(|| Status::not_found("User not found"))?;
+
+        let code = self.totp.generate(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs());
+
+        println!("Code: {}", code);
 
         Ok(Response::new(LoginResponse {}))
     }
 
     async fn validate_otp(&self, request: Request<ValidateOtpRequest>) -> Result<Response<ValidateOtpResponse>, Status> {
-        todo!()
+        let request = request.into_inner();
+        validate_otp_request(&request).map_err(|e| Status::invalid_argument(e.to_string()))?;
+        let timestamp2 = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+
+        let valid = self.totp.check(&request.otp, timestamp2);
+
+        if valid {
+            let user = User::find_by_email(&mut self.database.lock().unwrap(), &request.email)
+                .ok_or_else(|| Status::not_found("User not found"))?;
+
+            let tokens = generate_tokens(user.id);
+
+            Ok(Response::new(ValidateOtpResponse {
+                tokens: Some(tokens),
+            }))
+        } else {
+            Err(Status::invalid_argument("Invalid code"))
+        }
     }
 }
 
@@ -70,21 +97,32 @@ fn generate_tokens(user_id: Uuid) -> Tokens {
 }
 
 fn generate_access_token(user_id: Uuid) -> String {
-    let access_token_expiration = env::var("ACCESS_TOKEN_EXPIRATION").expect("ACCESS_TOKEN_EXPIRATION must be set");
-    let issuer = env::var("JWT_ISSUER").expect("JWT_ISSUER must be set");
+    let access_token_expiration: u64 = env::var("ACCESS_TOKEN_EXPIRATION")
+        .expect("ACCESS_TOKEN_EXPIRATION must be set")
+        .parse()
+        .expect("Failed to parse ACCESS_TOKEN_EXPIRATION");
+
+    let issuer = env::var("JWT_ISSUER")
+        .expect("JWT_ISSUER must be set");
+
+    let jwt_secret = env::var("JWT_SECRET")
+        .expect("JWT_SECRET must be set");
+
+    let exp = Utc::now().timestamp() + access_token_expiration as i64;
+
     let claims = Claims {
         sub: user_id.to_string(),
         iss: issuer,
-        iat: chrono::Utc::now().timestamp() as usize,
-        exp: access_token_expiration.parse().unwrap(),
+        iat: Utc::now().timestamp() as usize,
+        exp: exp as usize,
     };
 
-    let token = jsonwebtoken::encode(
-        &jsonwebtoken::Header::default(),
+    let token = encode(
+        &Header::default(),
         &claims,
-        &jsonwebtoken::EncodingKey::from_secret("secret".as_ref()),
+        &EncodingKey::from_secret(jwt_secret.as_bytes()),
     )
-    .unwrap();
+        .expect("Failed to generate JWT");
 
     token
 }
@@ -99,10 +137,12 @@ fn generate_refresh_token(user_id: Uuid) -> String {
         exp: refresh_token_expiration.parse().unwrap(),
     };
 
-    let token = jsonwebtoken::encode(
-        &jsonwebtoken::Header::default(),
+    let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
+
+    let token = encode(
+        &Header::default(),
         &claims,
-        &jsonwebtoken::EncodingKey::from_secret("secret".as_ref()),
+        &EncodingKey::from_secret(secret.as_ref()),
     )
     .unwrap();
 

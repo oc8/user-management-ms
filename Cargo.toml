@@ -18,7 +18,7 @@ regex = "1.10.4"
 jsonwebtoken = "9"
 serde = { version = "1.0.198", features = ["derive"] }
 chrono = "0.4.38"
-totp-rs = "5.5.1"
+totp-rs = {version = "5.5.1", features = ["otpauth"]}
 validator = "0.18.1"
 
 [build-dependencies]
