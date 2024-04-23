@@ -6,7 +6,7 @@ service AuthService {
   rpc Register (RegisterRequest) returns (RegisterResponse) {}
   rpc Login (LoginRequest) returns (LoginResponse) {}
   rpc ValidateOTP (ValidateOTPRequest) returns (ValidateOTPResponse) {}
-//  rpc ValidateToken (Tokens) returns (Tokens) {}
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse) {}
 //  rpc RefreshToken (Tokens) returns (Tokens) {}
 }
 
@@ -34,4 +34,12 @@ message ValidateOTPRequest {
 
 message ValidateOTPResponse {
   Tokens tokens = 1;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
 }

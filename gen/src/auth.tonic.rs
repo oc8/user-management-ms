@@ -152,6 +152,31 @@ pub mod auth_service_client {
                 .insert(GrpcMethod::new("auth.AuthService", "ValidateOTP"));
             self.inner.unary(req, path, codec).await
         }
+        pub async fn validate_token(
+            &mut self,
+            request: impl tonic::IntoRequest<super::ValidateTokenRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ValidateTokenResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/auth.AuthService/ValidateToken",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("auth.AuthService", "ValidateToken"));
+            self.inner.unary(req, path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -177,6 +202,13 @@ pub mod auth_service_server {
             request: tonic::Request<super::ValidateOtpRequest>,
         ) -> std::result::Result<
             tonic::Response<super::ValidateOtpResponse>,
+            tonic::Status,
+        >;
+        async fn validate_token(
+            &self,
+            request: tonic::Request<super::ValidateTokenRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ValidateTokenResponse>,
             tonic::Status,
         >;
     }
@@ -380,6 +412,52 @@ pub mod auth_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = ValidateOTPSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/auth.AuthService/ValidateToken" => {
+                    #[allow(non_camel_case_types)]
+                    struct ValidateTokenSvc<T: AuthService>(pub Arc<T>);
+                    impl<
+                        T: AuthService,
+                    > tonic::server::UnaryService<super::ValidateTokenRequest>
+                    for ValidateTokenSvc<T> {
+                        type Response = super::ValidateTokenResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::ValidateTokenRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as AuthService>::validate_token(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = ValidateTokenSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
