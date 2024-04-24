@@ -11,7 +11,6 @@ mod schema;
 mod models;
 mod validations;
 mod server;
-mod config;
 mod database;
 mod rpcs;
 
