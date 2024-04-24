@@ -12,12 +12,14 @@ use crate::schema::users;
 pub struct User {
     pub id: Uuid,
     pub email: String,
+    pub otp_secret: String,
 }
 
 #[derive(Insertable, Debug)]
 #[diesel(table_name = users)]
 pub struct NewUser<'a> {
     pub email: &'a str,
+    pub otp_secret: &'a str,
 }
 
 impl User {

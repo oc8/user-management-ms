@@ -1,5 +1,5 @@
 use tonic::{Code, Status};
-use protos::auth::{LoginRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
+use protos::auth::{LoginRequest, RefreshTokenRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
 use validator::{ValidateEmail};
 
 pub fn validate_register_request(req: &RegisterRequest) -> Result<(), Status> {
@@ -33,11 +33,21 @@ pub fn validate_otp_request(req: &ValidateOtpRequest) -> Result<(), Status> {
 }
 
 pub fn validate_token_request(req: &ValidateTokenRequest) -> Result<(), Status> {
-    if req.token.len() > 0 {
+    if req.access_token.len() > 0 {
         Ok(())
     } else {
         Err(Status::new(
             Code::InvalidArgument, "token_invalid_format".to_string(),
+        ))
+    }
+}
+
+pub fn validate_refresh_token_request(req: &RefreshTokenRequest) -> Result<(), Status> {
+    if req.refresh_token.len() > 0 {
+        Ok(())
+    } else {
+        Err(Status::new(
+            Code::InvalidArgument, "refresh_token_invalid_format".to_string(),
         ))
     }
 }

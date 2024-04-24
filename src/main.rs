@@ -1,15 +1,19 @@
 use std::env;
+use std::sync::Arc;
 
-use diesel::{Connection, PgConnection};
 use dotenvy::dotenv;
-use tonic::transport::Server;
-use totp_rs::{Algorithm, Secret, TOTP};
-use protos::auth::auth_service_server::AuthServiceServer;
+use redis::Client;
+use user_management::init_service_logging;
+use crate::server::start_server;
 
-mod gateways;
+mod services;
 mod schema;
 mod models;
 mod validations;
+mod server;
+mod config;
+mod database;
+mod rpcs;
 
 // mod proto {
 //     tonic::include_proto!("auth");
@@ -18,31 +22,25 @@ mod validations;
 //         tonic::include_file_descriptor_set!("auth_descriptor");
 // }
 
-pub fn connect_db() -> PgConnection {
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
-}
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
+    init_service_logging();
 
-    let database = connect_db();
-    let addr = "[::1]:50051".parse()?;
+    let pool = Arc::new(database::establish_pool());
 
-    println!("Server listening on {}", addr);
+    pool
+        .get()
+        .expect("Couldn't get a connection from the pool");
 
-    let opt_secret = env::var("OTP_SECRET").expect("OTP_SECRET must be set");
-    let totp = TOTP::new(Algorithm::SHA1, 6, 1, 60, Secret::Encoded(opt_secret).to_bytes().unwrap(), None, "".to_string()).unwrap();
+    let port = env::var("PORT").unwrap_or_else(|_| "50051".to_string()).parse().expect("PORT must be a number");
 
-    Server::builder()
-        .add_service(AuthServiceServer::new(gateways::auth::Service::new(
-            database,
-            totp
-        )))
-        .serve(addr)
-        .await?;
+    let redis_url = env::var("REDIS_URL").expect("REDIS_URL must be set");
+    let r_client = Client::open(redis_url)?;
+
+    let server = start_server(pool.clone(), r_client, port);
+
+    server?.handle.await?;
 
     Ok(())
 }

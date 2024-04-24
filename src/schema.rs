@@ -5,5 +5,7 @@ diesel::table! {
         id -> Uuid,
         #[max_length = 255]
         email -> Varchar,
+        #[max_length = 255]
+        otp_secret -> Varchar,
     }
 }
