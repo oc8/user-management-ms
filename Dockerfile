@@ -1,7 +1,17 @@
-FROM rust:alpine3.19
+FROM rust:1.77.2-slim-buster as build
 
 WORKDIR /app
 
-RUN apk add --no-cache musl-dev
+RUN apt-get update && apt-get install -y musl-tools libpq-dev
 
-RUN cargo install cargo-watch
+COPY . .
+
+RUN cargo build --release
+
+FROM alpine:3.19
+
+WORKDIR /app
+
+COPY --from=build /app/target/release/user-management .
+
+CMD ["./user-management"]
