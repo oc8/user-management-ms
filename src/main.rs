@@ -34,8 +34,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let port = env::var("PORT").unwrap_or_else(|_| "50051".to_string()).parse().expect("PORT must be a number");
 
-    let redis_url = env::var("REDIS_URL").expect("REDIS_URL must be set");
-    let r_client = Client::open(redis_url)?;
+    let uri_scheme = match env::var("REDIS_TLS").unwrap_or_default().parse::<bool>() {
+        Ok(bool) => if bool { "rediss" } else { "redis" },
+        Err(_) => "redis",
+    };
+
+    let redis_host = env::var("REDIS_HOSTNAME").expect("REDIS_HOSTNAME must be set");
+    let redis_pass = env::var("REDIS_PASSWORD").unwrap_or_default();
+    let redis_conn_url = format!("{}://:{}@{}", uri_scheme, redis_pass, redis_host);
+    let r_client = Client::open(redis_conn_url)?;
 
     let server = start_server(pool.clone(), r_client, port);
 
