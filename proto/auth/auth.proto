@@ -10,11 +10,23 @@ service Auth {
   rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {}
 }
 
+enum AuthType {
+  AUTH_TYPE_UNSPECIFIED = 0;
+  AUTH_TYPE_MAIL = 1;
+  AUTH_TYPE_SMS = 2;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+}
+
 message Tokens {
   string access_token = 1;
   string refresh_token = 2;
-  uint64 expires_at = 3;
-  uint64 issued_at = 4;
+  string token_type = 3;
+  uint64 expires_in = 4;
+  User user = 5;
 }
 
 message RegisterRequest {
@@ -25,6 +37,7 @@ message RegisterResponse {}
 
 message LoginRequest {
   string email = 1;
+  AuthType auth_type = 2;
 }
 
 message LoginResponse {

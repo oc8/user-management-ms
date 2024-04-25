@@ -4,10 +4,10 @@ use chrono::Utc;
 use tonic::{Code, Request, Response, Status};
 use jsonwebtoken::{encode, EncodingKey, Header};
 
-use protos::auth::{auth_server::Auth, RegisterRequest, Tokens, LoginRequest, RegisterResponse, LoginResponse, ValidateOtpRequest, ValidateOtpResponse, ValidateTokenRequest, ValidateTokenResponse, RefreshTokenRequest, RefreshTokenResponse};
+use protos::auth::{auth_server::Auth, RegisterRequest, User as UserProto, Tokens, LoginRequest, RegisterResponse, LoginResponse, ValidateOtpRequest, ValidateOtpResponse, ValidateTokenRequest, ValidateTokenResponse, RefreshTokenRequest, RefreshTokenResponse};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use crate::database::{PgPool, PgPooledConnection};
+use crate::models::user::User;
 use crate::rpcs;
 
 pub struct AuthService {
@@ -41,7 +41,7 @@ impl Auth for AuthService {
 
     async fn validate_otp(&self, request: Request<ValidateOtpRequest>) -> Result<Response<ValidateOtpResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
-        rpcs::validate_otp(request.into_inner(), &self.r_client, &mut conn).map(Response::new)
+        rpcs::validate_otp(request.into_inner(), &mut conn).map(Response::new)
     }
 
     async fn validate_token(&self, request: Request<ValidateTokenRequest>) -> Result<Response<ValidateTokenResponse>, Status> {
@@ -49,7 +49,8 @@ impl Auth for AuthService {
     }
 
     async fn refresh_token(&self, request: Request<RefreshTokenRequest>) -> Result<Response<RefreshTokenResponse>, Status> {
-        rpcs::refresh_token(request.into_inner(), &self.r_client).map(Response::new)
+        let mut conn = get_connection(&self.pool)?;
+        rpcs::refresh_token(request.into_inner(), &mut conn, &self.r_client).map(Response::new)
     }
 }
 
@@ -63,22 +64,26 @@ pub(crate) struct Claims {
 
 pub struct Token {
     pub token: String,
-    pub expires_at: u64,
+    pub expires_it: u64,
 }
 
-pub(crate) fn generate_tokens(user_id: Uuid) -> Result<Tokens, Box<dyn std::error::Error>> {
-    let access_token = generate_access_token(user_id)?;
-    let refresh_token = generate_refresh_token(user_id)?;
+pub(crate) fn generate_tokens(user: &User) -> Result<Tokens, Box<dyn std::error::Error>> {
+    let access_token = generate_access_token(user)?;
+    let refresh_token = generate_refresh_token(user)?;
 
     Ok(Tokens {
         access_token: access_token.token,
         refresh_token: refresh_token.token,
-        expires_at: access_token.expires_at,
-        issued_at: Utc::now().timestamp() as u64,
+        expires_in: access_token.expires_it,
+        token_type: "Bearer".to_string(),
+        user: Option::from(UserProto {
+            id: user.id.to_string(),
+            email: user.email.clone(),
+        })
     })
 }
 
-pub(crate) fn generate_access_token(user_id: Uuid) -> Result<Token, Box<dyn std::error::Error>> {
+pub(crate) fn generate_access_token(user: &User) -> Result<Token, Box<dyn std::error::Error>> {
     let access_token_expiration: u64 = env::var("ACCESS_TOKEN_TTL")
         .map_err(|_| "ACCESS_TOKEN_TTL must be set")?
         .parse()
@@ -91,7 +96,7 @@ pub(crate) fn generate_access_token(user_id: Uuid) -> Result<Token, Box<dyn std:
     let exp = Utc::now().timestamp() + access_token_expiration as i64;
 
     let claims = Claims {
-        sub: user_id.to_string(),
+        sub: user.id.to_string(),
         iss: issuer,
         iat: Utc::now().timestamp() as usize,
         exp: exp as usize,
@@ -106,12 +111,12 @@ pub(crate) fn generate_access_token(user_id: Uuid) -> Result<Token, Box<dyn std:
 
     Ok(Token {
         token,
-        expires_at: exp as u64,
+        expires_it: access_token_expiration,
     })
 }
 
-pub(crate) fn generate_refresh_token(user_id: Uuid) -> Result<Token, Box<dyn std::error::Error>> {
-    let access_token_expiration: u64 = env::var("REFRESH_TOKEN_TTL")
+pub(crate) fn generate_refresh_token(user: &User) -> Result<Token, Box<dyn std::error::Error>> {
+    let refresh_token_expiration: u64 = env::var("REFRESH_TOKEN_TTL")
         .map_err(|_| "REFRESH_TOKEN_TTL must be set")?
         .parse()
         .map_err(|_| "Failed to parse REFRESH_TOKEN_TTL")?;
@@ -120,10 +125,10 @@ pub(crate) fn generate_refresh_token(user_id: Uuid) -> Result<Token, Box<dyn std
 
     let jwt_secret = env::var("REFRESH_TOKEN_SECRET").map_err(|_| "REFRESH_TOKEN_SECRET must be set")?;
 
-    let exp = Utc::now().timestamp() + access_token_expiration as i64;
+    let exp = Utc::now().timestamp() + refresh_token_expiration as i64;
 
     let claims = Claims {
-        sub: user_id.to_string(),
+        sub: user.id.to_string(),
         iss: issuer,
         iat: Utc::now().timestamp() as usize,
         exp: exp as usize,
@@ -138,7 +143,7 @@ pub(crate) fn generate_refresh_token(user_id: Uuid) -> Result<Token, Box<dyn std
 
     Ok(Token {
         token,
-        expires_at: exp as u64,
+        expires_it: refresh_token_expiration,
     })
 }
 

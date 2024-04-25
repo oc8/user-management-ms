@@ -1,5 +1,5 @@
 use tonic::{Code, Status};
-use protos::auth::{LoginRequest, RefreshTokenRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
+use protos::auth::{AuthType, LoginRequest, RefreshTokenRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
 use validator::{ValidateEmail};
 
 pub fn validate_register_request(req: &RegisterRequest) -> Result<(), Status> {
@@ -13,14 +13,22 @@ pub fn validate_register_request(req: &RegisterRequest) -> Result<(), Status> {
 }
 
 pub fn validate_login_request(req: &LoginRequest) -> Result<(), Status> {
-    if req.email.validate_email() {
+    let is_valid_email = req.email.validate_email();
+    let is_valid_auth_type = req.auth_type > i32::from(AuthType::Unspecified) && req.auth_type <= i32::from(AuthType::Sms);
+
+    if is_valid_email && is_valid_auth_type {
         Ok(())
-    } else {
+    } else if !is_valid_email {
         Err(Status::new(
             Code::InvalidArgument, "email_invalid_format".to_string(),
         ))
+    } else {
+        Err(Status::new(
+            Code::InvalidArgument, "auth_type_invalid".to_string(),
+        ))
     }
 }
+
 
 pub fn validate_otp_request(req: &ValidateOtpRequest) -> Result<(), Status> {
     if req.otp.len() == 6 {

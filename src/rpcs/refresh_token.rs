@@ -4,6 +4,8 @@ use redis::{Commands, RedisResult};
 use tonic::{Status};
 use uuid::Uuid;
 use protos::auth::{RefreshTokenRequest, RefreshTokenResponse};
+use crate::database::PgPooledConnection;
+use crate::models::user::User;
 use crate::services::auth::{Claims, generate_tokens};
 use crate::validations::{validate_refresh_token_request};
 
@@ -23,6 +25,7 @@ fn is_refresh_token_valid(client: &redis::Client, token: &str) -> RedisResult<bo
 
 pub fn refresh_token(
     request: RefreshTokenRequest,
+    conn: &mut PgPooledConnection,
     r_client: &redis::Client,
 ) -> Result<RefreshTokenResponse, Status> {
     validate_refresh_token_request(&request).map_err(|e| Status::invalid_argument(e.to_string()))?;
@@ -42,7 +45,10 @@ pub fn refresh_token(
             let user_id = Uuid::parse_str(&decoded.claims.sub)
                 .map_err(|_| Status::invalid_argument("Invalid refresh token"))?;
 
-            let tokens = generate_tokens(user_id)
+            let user = User::find_by_id(conn, user_id)
+                .ok_or_else(|| Status::not_found("User not found"))?;
+
+            let tokens = generate_tokens(&user)
                 .map_err(|_| Status::internal("Failed to generate tokens"))?;
 
             let refresh_token_ttl = env::var("REFRESH_TOKEN_TTL").expect("REFRESH_TOKEN_TTL must be set").parse::<usize>().unwrap();

@@ -40,4 +40,12 @@ impl User {
             .first(conn)
             .ok()
     }
+
+    pub fn find_by_id(conn: &mut PgConnection, id: Uuid) -> Option<User> {
+        users::dsl::users
+            .select(User::as_select())
+            .filter(users::dsl::id.eq(id))
+            .first(conn)
+            .ok()
+    }
 }
