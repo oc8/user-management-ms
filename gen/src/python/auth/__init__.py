@@ -1,2 +1,2 @@
-import .auth_pb2
-import .auth_pb2_grpc
+from . import auth_pb2
+from . import auth_pb2_grpc
