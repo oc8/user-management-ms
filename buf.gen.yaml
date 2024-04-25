@@ -18,3 +18,7 @@ plugins:
     out: gen
     opt:
       - gen_crate=gen/Cargo.toml
+  - plugin: buf.build/grpc/python:v1.62.2
+    out: gen/src/python
+  - plugin: buf.build/protocolbuffers/python
+    out: gen/src/python
