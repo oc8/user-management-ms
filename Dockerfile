@@ -22,8 +22,9 @@ COPY --from=build /app/diesel.toml .
 COPY --from=build /app/migrations ./migrations
 COPY --from=build /app/src/schema.rs ./src/schema.rs
 
-RUN diesel migration run
-
 COPY --from=build /app/target/release/user-management .
 
-CMD ["./user-management"]
+COPY --from=build deployments/scripts/entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
