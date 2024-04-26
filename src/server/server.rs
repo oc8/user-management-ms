@@ -20,7 +20,7 @@ pub fn start_server(
     r_client: redis::Client,
     port: u16,
 ) -> Result<TonicServer, Box<dyn std::error::Error>> {
-    let auth = AuthService { pool, r_client };
+    let auth = AuthService { pool,  r_client };
 
     let (tonic_server, secure_mode) = match get_tls_config() {
         Some(tls) => {

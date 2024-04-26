@@ -36,12 +36,16 @@ impl Auth for AuthService {
 
     async fn login(&self, request: Request<LoginRequest>) -> Result<Response<LoginResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
-        rpcs::login(request.into_inner(), &mut conn).map(Response::new)
+        let mut r_conn = self.r_client.get_connection()
+            .map_err(|_| Status::new(Code::DataLoss, "redis_connection_failure"))?;
+        rpcs::login(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
     async fn validate_otp(&self, request: Request<ValidateOtpRequest>) -> Result<Response<ValidateOtpResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
-        rpcs::validate_otp(request.into_inner(), &mut conn).map(Response::new)
+        let mut r_conn = self.r_client.get_connection()
+            .map_err(|_| Status::new(Code::DataLoss, "redis_connection_failure"))?;
+        rpcs::validate_otp(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
     async fn validate_token(&self, request: Request<ValidateTokenRequest>) -> Result<Response<ValidateTokenResponse>, Status> {
@@ -50,7 +54,9 @@ impl Auth for AuthService {
 
     async fn refresh_token(&self, request: Request<RefreshTokenRequest>) -> Result<Response<RefreshTokenResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
-        rpcs::refresh_token(request.into_inner(), &mut conn, &self.r_client).map(Response::new)
+        let mut r_conn = self.r_client.get_connection()
+            .map_err(|_| Status::new(Code::DataLoss, "redis_connection_failure"))?;
+        rpcs::refresh_token(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 }
 

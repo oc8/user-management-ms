@@ -9,28 +9,24 @@ use crate::models::user::User;
 use crate::services::auth::{Claims, generate_tokens};
 use crate::validations::{validate_refresh_token_request};
 
-fn store_refresh_token(client: &redis::Client, token: &str, expiration_seconds: usize) -> RedisResult<()> {
-    let mut con = client.get_connection()?;
-
-    con.set_ex(token, expiration_seconds, expiration_seconds as u64)?;
+fn store_refresh_token(conn: &mut redis::Connection, token: &str, expiration_seconds: usize) -> RedisResult<()> {
+    conn.set_ex(token, expiration_seconds, expiration_seconds as u64)?;
     Ok(())
 }
 
-fn is_refresh_token_valid(client: &redis::Client, token: &str) -> RedisResult<bool> {
-    let mut con = client.get_connection()?;
-
-    let exists: bool = con.exists(token)?;
+fn is_refresh_token_valid(conn: &mut redis::Connection, token: &str) -> RedisResult<bool> {
+    let exists: bool = conn.exists(token)?;
     Ok(!exists)
 }
 
 pub fn refresh_token(
     request: RefreshTokenRequest,
     conn: &mut PgPooledConnection,
-    r_client: &redis::Client,
+    r_conn: &mut redis::Connection,
 ) -> Result<RefreshTokenResponse, Status> {
     validate_refresh_token_request(&request).map_err(|e| Status::invalid_argument(e.to_string()))?;
 
-    let token_valid = is_refresh_token_valid(r_client, &request.refresh_token)
+    let token_valid = is_refresh_token_valid(r_conn, &request.refresh_token)
         .map_err(|_| Status::internal("Failed to validate refresh token"))?;
 
     if !token_valid {
@@ -53,7 +49,7 @@ pub fn refresh_token(
 
             let refresh_token_ttl = env::var("REFRESH_TOKEN_TTL").expect("REFRESH_TOKEN_TTL must be set").parse::<usize>().unwrap();
 
-            store_refresh_token(r_client, &request.refresh_token, refresh_token_ttl)
+            store_refresh_token(r_conn, &request.refresh_token, refresh_token_ttl)
                 .map_err(|_| Status::internal("Failed to validate refresh token"))?;
 
             Ok(RefreshTokenResponse {

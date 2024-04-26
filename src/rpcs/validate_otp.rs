@@ -1,7 +1,5 @@
-use std::env;
-use std::time::{SystemTime, UNIX_EPOCH};
+use redis::Commands;
 use tonic::{Status};
-use totp_rs::{Algorithm, Secret, TOTP};
 use protos::auth::{ValidateOtpRequest, ValidateOtpResponse};
 use crate::database::PgPooledConnection;
 use crate::models::user::{User};
@@ -10,22 +8,25 @@ use crate::validations::{validate_otp_request};
 pub fn validate_otp(
     request: ValidateOtpRequest,
     conn: &mut PgPooledConnection,
+    r_conn: &mut redis::Connection,
 ) -> Result<ValidateOtpResponse, Status> {
     validate_otp_request(&request).map_err(|e| Status::invalid_argument(e.to_string()))?;
 
     let user = User::find_by_email(conn, &request.email)
         .ok_or_else(|| Status::not_found("User not found"))?;
 
-    let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-    let otp_ttl = env::var("OTP_TTL").expect("OTP_TTL must be set").parse().unwrap();
-    let totp = TOTP::new(Algorithm::SHA1, 6, 1, otp_ttl, Secret::Encoded(user.otp_secret.clone()).to_bytes().unwrap(), None, "".to_string()).unwrap();
+    let code: String = r_conn.get(&format!("otp:{}", request.email))
+        .map_err(|_| Status::not_found("Invalid OTP"))?;
 
-    if !totp.check(&request.otp, ts) {
-        return Err(Status::invalid_argument("Invalid otp code"));
+    if code != request.otp {
+        return Err(Status::invalid_argument("Invalid OTP"));
     }
 
     let tokens = crate::services::auth::generate_tokens(&user)
         .map_err(|_| Status::internal("Failed to generate tokens"))?;
+
+    r_conn.del(&format!("otp:{}", request.email))
+        .map_err(|_| Status::internal("Failed to validate OTP"))?;
 
     Ok(ValidateOtpResponse {
         tokens: Some(tokens),
