@@ -14,6 +14,8 @@ WORKDIR /app
 
 ARG DATABASE_URL
 
+EXPOSE 3000
+
 RUN apt-get update && apt-get install -y libpq-dev && rm -rf /var/lib/apt/lists/*
 
 RUN cargo install diesel_cli --no-default-features --features postgres
