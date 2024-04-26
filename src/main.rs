@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .get()
         .expect("Couldn't get a connection from the pool");
 
-    let port = env::var("METRICS_PORT").unwrap_or_else(|_| "50051".to_string()).parse().expect("PORT must be a number");
+    let port = env::var("PORT").unwrap_or_else(|_| "50051".to_string()).parse().expect("PORT must be a number");
 
     let uri_scheme = match env::var("REDIS_TLS").unwrap_or_default().parse::<bool>() {
         Ok(bool) => if bool { "rediss" } else { "redis" },
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         get(|| async { prometheus_exporter::encode_http_response() }),
     );
 
-    let metrics_port: u16 = env::var("PORT").unwrap_or_else(|_| "3000".to_string()).parse().expect("METRICS_PORT must be a number");
+    let metrics_port: u16 = env::var("METRICS_PORT").unwrap_or_else(|_| "3000".to_string()).parse().expect("METRICS_PORT must be a number");
     let metrics_addr = SocketAddr::from(([0, 0, 0, 0], metrics_port));
     let listener = tokio::net::TcpListener::bind(metrics_addr).await.unwrap();
     log::info!("Metrics server listening on port {}", metrics_port);
