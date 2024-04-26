@@ -24,7 +24,7 @@ COPY --from=build /app/src/schema.rs ./src/schema.rs
 
 COPY --from=build /app/target/release/user-management .
 
-COPY --from=build deployments/scripts/entrypoint.sh ./entrypoint.sh
+COPY --from=build /app/deployments/scripts/entrypoint.sh ./entrypoint.sh
 RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]

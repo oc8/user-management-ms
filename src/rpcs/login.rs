@@ -29,7 +29,7 @@ pub fn login(
 
     let code = totp.generate(SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs());
 
-    let _ : () = r_conn.set_ex(
+    r_conn.set_ex(
         &format!("otp:{}", request.email),
         code.clone(),
         otp_ttl,
