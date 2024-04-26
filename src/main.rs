@@ -1,4 +1,5 @@
 use std::env;
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::{routing::get, Router};
@@ -55,7 +56,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         get(|| async { prometheus_exporter::encode_http_response() }),
     );
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:8080").await.unwrap();
+    let addr = format!("127.0.0.1:{}", port);
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     log::info!("Server listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
 
