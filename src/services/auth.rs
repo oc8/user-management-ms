@@ -11,6 +11,14 @@ use crate::database::{PgPool, PgPooledConnection};
 use crate::models::user::User;
 use crate::{errors, rpcs};
 
+use autometrics::objectives::{
+    Objective, ObjectiveLatency, ObjectivePercentile
+};
+
+const API_SLO: Objective = Objective::new("api")
+    .success_rate(ObjectivePercentile::P99_9)
+    .latency(ObjectiveLatency::Ms250, ObjectivePercentile::P99);
+
 pub struct AuthService {
     pub pool: Arc<PgPool>,
     pub r_client: redis::Client,
@@ -26,6 +34,7 @@ impl Clone for AuthService {
 }
 
 #[tonic::async_trait]
+#[autometrics(objective = API_SLO)]
 impl Auth for AuthService {
     #[autometrics]
     async fn register(
