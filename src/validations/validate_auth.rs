@@ -1,13 +1,14 @@
 use tonic::{Code, Status};
 use protos::auth::{LoginRequest, RefreshTokenRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
 use validator::{ValidateEmail};
+use crate::errors;
 
 pub fn validate_register_request(req: &RegisterRequest) -> Result<(), Status> {
     if req.email.validate_email() {
         Ok(())
     } else {
         Err(Status::new(
-            Code::InvalidArgument, "email_invalid_format".to_string(),
+            Code::InvalidArgument, errors::INVALID_EMAIL_FORMAT,
         ))
     }
 }
@@ -17,7 +18,7 @@ pub fn validate_login_request(req: &LoginRequest) -> Result<(), Status> {
         Ok(())
     } else {
         Err(Status::new(
-            Code::InvalidArgument, "email_invalid_format".to_string(),
+            Code::InvalidArgument, errors::INVALID_EMAIL_FORMAT,
         ))
     }
 }
@@ -28,7 +29,7 @@ pub fn validate_otp_request(req: &ValidateOtpRequest) -> Result<(), Status> {
         Ok(())
     } else {
         Err(Status::new(
-            Code::InvalidArgument, "otp_invalid_format".to_string(),
+            Code::InvalidArgument, errors::INVALID_OTP_FORMAT,
         ))
     }
 }
@@ -38,7 +39,7 @@ pub fn validate_token_request(req: &ValidateTokenRequest) -> Result<(), Status> 
         Ok(())
     } else {
         Err(Status::new(
-            Code::InvalidArgument, "token_invalid_format".to_string(),
+            Code::InvalidArgument, errors::INVALID_TOKEN_FORMAT,
         ))
     }
 }
@@ -48,7 +49,7 @@ pub fn validate_refresh_token_request(req: &RefreshTokenRequest) -> Result<(), S
         Ok(())
     } else {
         Err(Status::new(
-            Code::InvalidArgument, "refresh_token_invalid_format".to_string(),
+            Code::InvalidArgument, errors::INVALID_TOKEN_FORMAT,
         ))
     }
 }

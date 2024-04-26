@@ -27,10 +27,17 @@ impl User {
         conn: &mut PgConnection,
         user: NewUser,
     ) -> Result<User, diesel::result::Error> {
-        diesel::insert_into(users::table)
+        match diesel::insert_into(users::table)
             .values(user)
             .returning(User::as_returning())
             .get_result(conn)
+        {
+            Ok(user) => Ok(user),
+            Err(e) => {
+                log::error!("Failed to create user: {}", e);
+                Err(e)
+            },
+        }
     }
 
     pub fn find_by_email(conn: &mut PgConnection, email: &str) -> Option<User> {

@@ -4,6 +4,7 @@ use protos::auth::{RegisterRequest, RegisterResponse};
 use crate::models::user::{NewUser, User};
 use crate::validations::{validate_register_request};
 use crate::database::PgPooledConnection;
+use crate::errors::errors;
 
 fn generate_opt_secret() -> String {
     let mut secret_key = vec![0u8; 20];
@@ -18,7 +19,7 @@ pub fn register(
     request: RegisterRequest,
     conn: &mut PgPooledConnection,
 ) -> Result<RegisterResponse, Status> {
-    validate_register_request(&request).map_err(|e| Status::invalid_argument(e.to_string()))?;
+    validate_register_request(&request)?;
 
     let secret = generate_opt_secret();
 
@@ -28,7 +29,7 @@ pub fn register(
     };
 
     let _user = User::create(conn, user)
-        .map_err(|e| Status::internal(e.to_string()))?;
+        .map_err(|_| Status::already_exists(errors::EMAIL_ALREADY_EXISTS))?;
 
     log::info!("User registered: {}", request.email);
 

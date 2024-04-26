@@ -1,0 +1,11 @@
+pub const INTERNAL: &str = "internal";
+pub const REDIS_CONNECTION_FAILURE: &str = "redis_connection_failure";
+pub const DATABASE_CONNECTION_FAILURE: &str = "database_connection_failure";
+pub const EMAIL_ALREADY_EXISTS: &str = "email_already_exists";
+pub const INVALID_EMAIL_FORMAT: &str = "invalid_email_format";
+pub const INVALID_OTP: &str = "invalid_otp";
+pub const INVALID_OTP_FORMAT: &str = "invalid_otp_format";
+pub const INVALID_TOKEN: &str = "invalid_token";
+pub const INVALID_TOKEN_FORMAT: &str = "invalid_token_format";
+pub const INVALID_REFRESH_TOKEN: &str = "invalid_refresh_token";
+pub const USER_NOT_FOUND: &str = "user_not_found";

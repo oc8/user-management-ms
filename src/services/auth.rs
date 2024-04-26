@@ -1,5 +1,6 @@
 use std::env;
 use std::sync::{Arc};
+use autometrics::autometrics;
 use chrono::Utc;
 use tonic::{Code, Request, Response, Status};
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -8,7 +9,7 @@ use protos::auth::{auth_server::Auth, RegisterRequest, User as UserProto, Tokens
 use serde::{Deserialize, Serialize};
 use crate::database::{PgPool, PgPooledConnection};
 use crate::models::user::User;
-use crate::rpcs;
+use crate::{errors, rpcs};
 
 pub struct AuthService {
     pub pool: Arc<PgPool>,
@@ -26,6 +27,7 @@ impl Clone for AuthService {
 
 #[tonic::async_trait]
 impl Auth for AuthService {
+    #[autometrics]
     async fn register(
         &self,
         request: Request<RegisterRequest>,
@@ -34,28 +36,29 @@ impl Auth for AuthService {
         rpcs::register(request.into_inner(), &mut conn).map(Response::new)
     }
 
+    #[autometrics]
     async fn login(&self, request: Request<LoginRequest>) -> Result<Response<LoginResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
-        let mut r_conn = self.r_client.get_connection()
-            .map_err(|_| Status::new(Code::DataLoss, "redis_connection_failure"))?;
+        let mut r_conn = get_redis_connection(&self.r_client)?;
         rpcs::login(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
+    #[autometrics]
     async fn validate_otp(&self, request: Request<ValidateOtpRequest>) -> Result<Response<ValidateOtpResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
-        let mut r_conn = self.r_client.get_connection()
-            .map_err(|_| Status::new(Code::DataLoss, "redis_connection_failure"))?;
+        let mut r_conn = get_redis_connection(&self.r_client)?;
         rpcs::validate_otp(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
+    #[autometrics]
     async fn validate_token(&self, request: Request<ValidateTokenRequest>) -> Result<Response<ValidateTokenResponse>, Status> {
         rpcs::validate_token(request.into_inner()).map(Response::new)
     }
 
+    #[autometrics]
     async fn refresh_token(&self, request: Request<RefreshTokenRequest>) -> Result<Response<RefreshTokenResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
-        let mut r_conn = self.r_client.get_connection()
-            .map_err(|_| Status::new(Code::DataLoss, "redis_connection_failure"))?;
+        let mut r_conn = get_redis_connection(&self.r_client)?;
         rpcs::refresh_token(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 }
@@ -68,7 +71,7 @@ pub(crate) struct Claims {
     exp: usize,
 }
 
-pub struct Token {
+pub(crate) struct Token {
     pub token: String,
     pub expires_it: u64,
 }
@@ -113,7 +116,7 @@ pub(crate) fn generate_access_token(user: &User) -> Result<Token, Box<dyn std::e
         &claims,
         &EncodingKey::from_secret(jwt_secret.as_bytes()),
     )
-        .map_err(|_| "Failed to generate JWT")?;
+        .map_err(|_| "Failed to generate access token")?;
 
     Ok(Token {
         token,
@@ -145,7 +148,7 @@ pub(crate) fn generate_refresh_token(user: &User) -> Result<Token, Box<dyn std::
         &claims,
         &EncodingKey::from_secret(jwt_secret.as_bytes()),
     )
-        .map_err(|_| "Failed to generate JWT")?;
+        .map_err(|_| "Failed to generate refresh token")?;
 
     Ok(Token {
         token,
@@ -155,7 +158,14 @@ pub(crate) fn generate_refresh_token(user: &User) -> Result<Token, Box<dyn std::
 
 fn get_connection(pool: &PgPool) -> Result<PgPooledConnection, Status> {
     match pool.get() {
-        Err(_) => Err(Status::new(Code::DataLoss, "database_connection_failure")),
+        Err(_) => Err(Status::new(Code::DataLoss, errors::DATABASE_CONNECTION_FAILURE)),
+        Ok(conn) => Ok(conn),
+    }
+}
+
+fn get_redis_connection(r_client: &redis::Client) -> Result<redis::Connection, Status> {
+    match r_client.get_connection() {
+        Err(_) => Err(Status::new(Code::DataLoss, errors::REDIS_CONNECTION_FAILURE)),
         Ok(conn) => Ok(conn),
     }
 }

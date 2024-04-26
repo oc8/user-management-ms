@@ -1,6 +1,8 @@
 use std::env;
 use std::sync::Arc;
 
+use axum::{routing::get, Router};
+use autometrics::prometheus_exporter;
 use dotenvy::dotenv;
 use redis::Client;
 use user_management::init_service_logging;
@@ -13,6 +15,7 @@ mod validations;
 mod server;
 mod database;
 mod rpcs;
+mod errors;
 
 // mod proto {
 //     tonic::include_proto!("auth");
@@ -25,6 +28,7 @@ mod rpcs;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
     init_service_logging();
+    prometheus_exporter::init();
 
     let pool = Arc::new(database::establish_pool());
 
@@ -44,9 +48,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let redis_conn_url = format!("{}://:{}@{}", uri_scheme, redis_pass, redis_host);
     let r_client = Client::open(redis_conn_url)?;
 
-    let server = start_server(pool.clone(), r_client, port);
+    let _server = start_server(pool.clone(), r_client, port);
 
-    server?.handle.await?;
+    let app = Router::new().route(
+        "/metrics",
+        get(|| async { prometheus_exporter::encode_http_response() }),
+    );
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:8080").await.unwrap();
+    log::info!("Server listening on {}", listener.local_addr().unwrap());
+    axum::serve(listener, app).await.unwrap();
 
     Ok(())
 }

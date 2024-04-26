@@ -14,7 +14,6 @@ pub struct TonicServer {
     pub handle: JoinHandle<()>,
     pub tls: bool,
 }
-
 pub fn start_server(
     pool: Arc<PgPool>,
     r_client: redis::Client,
