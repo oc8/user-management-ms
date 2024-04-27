@@ -3,7 +3,6 @@ use std::sync::Arc;
 use ::log::{info, warn};
 use tokio::task::JoinHandle;
 use tonic::transport::{Certificate, Identity, Server, ServerTlsConfig};
-// use tower_http::cors::CorsLayer;
 use protos::auth::auth_server::AuthServer;
 use user_management::{create_socket_addr, env_var, report_error};
 use crate::database::PgPool;
@@ -21,7 +20,7 @@ pub fn start_server(
 ) -> Result<TonicServer, Box<dyn std::error::Error>> {
     let auth = AuthService { pool,  r_client };
 
-    let (tonic_server, secure_mode) = match get_tls_config() {
+    let (mut tonic_server, secure_mode) = match get_tls_config() {
         Some(tls) => {
             info!("Configuring TLS...");
             match Server::builder().tls_config(tls) {
@@ -43,8 +42,6 @@ pub fn start_server(
     };
 
     let tonic_router = tonic_server
-        .accept_http1(true)
-        // .layer(CorsLayer::permissive())
         .add_service(AuthServer::new(auth));
 
     let server = tokio::spawn(async move {

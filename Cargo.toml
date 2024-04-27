@@ -9,12 +9,10 @@ tokio = { version = "1.37.0", features = ["rt", "rt-multi-thread", "macros"] }
 tonic-build = "0.11.0"
 prost = "0.12.4"
 d = "0.0.1"
-tonic-reflection = "0.11.0"
 protos = { path = "./gen" }
 diesel = { version = "2.1.6", features = ["postgres_backend", "postgres", "uuid", "r2d2"] }
 dotenvy = "0.15.7"
 uuid = "1.8.0"
-regex = "1.10.4"
 jsonwebtoken = "9"
 serde = { version = "1.0.198", features = ["derive"] }
 chrono = "0.4.38"
@@ -22,7 +20,6 @@ totp-rs = {version = "5.5.1", features = ["otpauth"]}
 validator = "0.18.1"
 log = "0.4.21"
 env_logger = "0.11.3"
-tower-http = { version = "=0.5.2", features = ["cors"] }
 redis = "0.25.3"
 rand = "0.8.5"
 base32 = "0.4.0"

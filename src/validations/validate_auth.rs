@@ -1,5 +1,5 @@
 use tonic::{Code, Status};
-use protos::auth::{LoginRequest, LogoutRequest, RefreshTokenRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
+use protos::auth::{GenerateMagicLinkRequest, LoginRequest, LogoutRequest, RefreshTokenRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
 use validator::{ValidateEmail};
 use crate::errors;
 
@@ -60,6 +60,16 @@ pub fn validate_logout_request(req: &LogoutRequest) -> Result<(), Status> {
     } else {
         Err(Status::new(
             Code::InvalidArgument, errors::INVALID_TOKEN_FORMAT,
+        ))
+    }
+}
+
+pub fn validate_generate_magic_link_request(req: &GenerateMagicLinkRequest) -> Result<(), Status> {
+    if req.email.validate_email() {
+        Ok(())
+    } else {
+        Err(Status::new(
+            Code::InvalidArgument, errors::INVALID_EMAIL_FORMAT,
         ))
     }
 }

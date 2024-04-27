@@ -24,6 +24,11 @@ class AuthStub(object):
                 request_serializer=auth_dot_auth__pb2.LoginRequest.SerializeToString,
                 response_deserializer=auth_dot_auth__pb2.LoginResponse.FromString,
                 )
+        self.GenerateMagicLink = channel.unary_unary(
+                '/auth.Auth/GenerateMagicLink',
+                request_serializer=auth_dot_auth__pb2.GenerateMagicLinkRequest.SerializeToString,
+                response_deserializer=auth_dot_auth__pb2.GenerateMagicLinkResponse.FromString,
+                )
         self.ValidateOTP = channel.unary_unary(
                 '/auth.Auth/ValidateOTP',
                 request_serializer=auth_dot_auth__pb2.ValidateOTPRequest.SerializeToString,
@@ -56,6 +61,12 @@ class AuthServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def Login(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GenerateMagicLink(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -97,6 +108,11 @@ def add_AuthServicer_to_server(servicer, server):
                     servicer.Login,
                     request_deserializer=auth_dot_auth__pb2.LoginRequest.FromString,
                     response_serializer=auth_dot_auth__pb2.LoginResponse.SerializeToString,
+            ),
+            'GenerateMagicLink': grpc.unary_unary_rpc_method_handler(
+                    servicer.GenerateMagicLink,
+                    request_deserializer=auth_dot_auth__pb2.GenerateMagicLinkRequest.FromString,
+                    response_serializer=auth_dot_auth__pb2.GenerateMagicLinkResponse.SerializeToString,
             ),
             'ValidateOTP': grpc.unary_unary_rpc_method_handler(
                     servicer.ValidateOTP,
@@ -159,6 +175,23 @@ class Auth(object):
         return grpc.experimental.unary_unary(request, target, '/auth.Auth/Login',
             auth_dot_auth__pb2.LoginRequest.SerializeToString,
             auth_dot_auth__pb2.LoginResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GenerateMagicLink(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/auth.Auth/GenerateMagicLink',
+            auth_dot_auth__pb2.GenerateMagicLinkRequest.SerializeToString,
+            auth_dot_auth__pb2.GenerateMagicLinkResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
