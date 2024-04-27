@@ -1,4 +1,6 @@
 version: v1
+managed:
+  enabled: true
 plugins:
   - plugin: prost
     out: gen/src
@@ -18,7 +20,5 @@ plugins:
     out: gen
     opt:
       - gen_crate=gen/Cargo.toml
-  - plugin: buf.build/grpc/python:v1.62.2
-    out: gen/src/python
-  - plugin: buf.build/protocolbuffers/python
+  - plugin: buf.build/community/danielgtaylor-betterproto:v1.2.5
     out: gen/src/python
