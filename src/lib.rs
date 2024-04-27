@@ -1,4 +1,5 @@
 use std::env;
+use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
 
 pub fn init_service_logging() {
     env_logger::builder()
@@ -24,4 +25,21 @@ pub fn report_error<E: 'static>(err: E)
         }
     }
     log::error!("[ERROR] {}\nCaused by: {}", err, stack);
+}
+
+pub fn create_socket_addr(port: u16) -> SocketAddr {
+    let is_ipv6 = env::var("ENABLE_IPV6").unwrap_or_default().parse::<bool>().unwrap_or(false);
+
+    if is_ipv6 {
+        log::info!("Using IPv6");
+        SocketAddr::from(SocketAddrV6::new(
+            Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0),
+            port,
+            0,
+            0,
+        ))
+    } else {
+        log::info!("Using IPv4");
+        SocketAddr::from(([0, 0, 0, 0], port))
+    }
 }

@@ -1,12 +1,11 @@
 use std::env;
-use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
 use std::sync::Arc;
 
 use axum::{routing::get, Router};
 use autometrics::prometheus_exporter;
 use dotenvy::dotenv;
 use redis::Client;
-use user_management::init_service_logging;
+use user_management::{create_socket_addr, init_service_logging};
 use crate::server::start_server;
 
 mod services;
@@ -57,12 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let metrics_port: u16 = env::var("METRICS_PORT").unwrap_or_else(|_| "3000".to_string()).parse().expect("METRICS_PORT must be a number");
-    let metrics_addr = SocketAddr::from(SocketAddrV6::new(
-        Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0),
-        metrics_port,
-        0,
-        0,
-    ));
+    let metrics_addr = create_socket_addr(metrics_port);
     let listener = tokio::net::TcpListener::bind(metrics_addr).await.unwrap();
     log::info!("Metrics server listening on port {}", metrics_port);
     axum::serve(listener, app).await.unwrap();

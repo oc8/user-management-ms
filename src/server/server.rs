@@ -1,12 +1,11 @@
 use std::sync::Arc;
 
 use ::log::{info, warn};
-use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
 use tokio::task::JoinHandle;
 use tonic::transport::{Certificate, Identity, Server, ServerTlsConfig};
 // use tower_http::cors::CorsLayer;
 use protos::auth::auth_server::AuthServer;
-use user_management::{env_var, report_error};
+use user_management::{create_socket_addr, env_var, report_error};
 use crate::database::PgPool;
 use crate::services::auth::AuthService;
 
@@ -49,12 +48,7 @@ pub fn start_server(
         .add_service(AuthServer::new(auth));
 
     let server = tokio::spawn(async move {
-        let tonic_addr = SocketAddr::from(SocketAddrV6::new(
-            Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0),
-            port,
-            0,
-            0,
-        ));
+        let tonic_addr = create_socket_addr(port);
         info!("Starting server on port {}", port);
         match tonic_router.serve(tonic_addr).await {
             Ok(_) => info!("Server finished on {}", tonic_addr),
