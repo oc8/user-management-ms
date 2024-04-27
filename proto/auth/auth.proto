@@ -5,6 +5,7 @@ package auth;
 service Auth {
   rpc Register (RegisterRequest) returns (RegisterResponse) {}
   rpc Login (LoginRequest) returns (LoginResponse) {}
+  rpc GenerateMagicLink (GenerateMagicLinkRequest) returns (GenerateMagicLinkResponse) {}
   rpc ValidateOTP (ValidateOTPRequest) returns (ValidateOTPResponse) {}
   rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse) {}
   rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {}
@@ -36,6 +37,15 @@ message LoginRequest {
 
 message LoginResponse {
   string code = 1;
+}
+
+message GenerateMagicLinkRequest {
+  string email = 1;
+}
+
+message GenerateMagicLinkResponse {
+  string refresh_token = 1;
+  uint64 expires_in = 2;
 }
 
 message ValidateOTPRequest {

@@ -46,6 +46,12 @@ impl Auth for AuthService {
     }
 
     #[autometrics]
+    async fn generate_magic_link(&self, request: Request<GenerateMagicLinkRequest>) -> Result<Response<GenerateMagicLinkResponse>, Status> {
+        let mut conn = get_connection(&self.pool)?;
+        rpcs::generate_magic_link(request.into_inner(), &mut conn).map(Response::new)
+    }
+
+    #[autometrics]
     async fn login(
         &self,
         request: Request<LoginRequest>,
@@ -103,7 +109,7 @@ pub(crate) struct Claims {
 
 pub(crate) struct Token {
     pub token: String,
-    pub expires_it: u64,
+    pub expires_in: u64,
 }
 
 pub(crate) fn generate_tokens(user: &User) -> Result<Tokens, Box<dyn std::error::Error>> {
@@ -113,7 +119,7 @@ pub(crate) fn generate_tokens(user: &User) -> Result<Tokens, Box<dyn std::error:
     Ok(Tokens {
         access_token: access_token.token,
         refresh_token: refresh_token.token,
-        expires_in: access_token.expires_it,
+        expires_in: access_token.expires_in,
         token_type: "Bearer".to_string(),
         user: Option::from(UserProto {
             id: user.id.to_string(),
@@ -152,7 +158,7 @@ pub(crate) fn generate_access_token(user: &User) -> Result<Token, Box<dyn std::e
 
     Ok(Token {
         token,
-        expires_it: access_token_expiration,
+        expires_in: access_token_expiration,
     })
 }
 
@@ -186,7 +192,7 @@ pub(crate) fn generate_refresh_token(user: &User) -> Result<Token, Box<dyn std::
 
     Ok(Token {
         token,
-        expires_it: refresh_token_expiration,
+        expires_in: refresh_token_expiration,
     })
 }
 

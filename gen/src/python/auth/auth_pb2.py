@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x61uth/auth.proto\x12\x04\x61uth\",\n\x04User\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n\x05\x65mail\x18\x02 \x01(\tR\x05\x65mail\"\xae\x01\n\x06Tokens\x12!\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\tR\x0b\x61\x63\x63\x65ssToken\x12#\n\rrefresh_token\x18\x02 \x01(\tR\x0crefreshToken\x12\x1d\n\ntoken_type\x18\x03 \x01(\tR\ttokenType\x12\x1d\n\nexpires_in\x18\x04 \x01(\x04R\texpiresIn\x12\x1e\n\x04user\x18\x05 \x01(\x0b\x32\n.auth.UserR\x04user\"\'\n\x0fRegisterRequest\x12\x14\n\x05\x65mail\x18\x01 \x01(\tR\x05\x65mail\"\x12\n\x10RegisterResponse\"$\n\x0cLoginRequest\x12\x14\n\x05\x65mail\x18\x01 \x01(\tR\x05\x65mail\"#\n\rLoginResponse\x12\x12\n\x04\x63ode\x18\x01 \x01(\tR\x04\x63ode\"<\n\x12ValidateOTPRequest\x12\x14\n\x05\x65mail\x18\x01 \x01(\tR\x05\x65mail\x12\x10\n\x03otp\x18\x02 \x01(\tR\x03otp\";\n\x13ValidateOTPResponse\x12$\n\x06tokens\x18\x01 \x01(\x0b\x32\x0c.auth.TokensR\x06tokens\"9\n\x14ValidateTokenRequest\x12!\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\tR\x0b\x61\x63\x63\x65ssToken\"-\n\x15ValidateTokenResponse\x12\x14\n\x05valid\x18\x01 \x01(\x08R\x05valid\":\n\x13RefreshTokenRequest\x12#\n\rrefresh_token\x18\x01 \x01(\tR\x0crefreshToken\"<\n\x14RefreshTokenResponse\x12$\n\x06tokens\x18\x01 \x01(\x0b\x32\x0c.auth.TokensR\x06tokens\"4\n\rLogoutRequest\x12#\n\rrefresh_token\x18\x01 \x01(\tR\x0crefreshToken\"\x10\n\x0eLogoutResponse2\x89\x03\n\x04\x41uth\x12;\n\x08Register\x12\x15.auth.RegisterRequest\x1a\x16.auth.RegisterResponse\"\x00\x12\x32\n\x05Login\x12\x12.auth.LoginRequest\x1a\x13.auth.LoginResponse\"\x00\x12\x44\n\x0bValidateOTP\x12\x18.auth.ValidateOTPRequest\x1a\x19.auth.ValidateOTPResponse\"\x00\x12J\n\rValidateToken\x12\x1a.auth.ValidateTokenRequest\x1a\x1b.auth.ValidateTokenResponse\"\x00\x12G\n\x0cRefreshToken\x12\x19.auth.RefreshTokenRequest\x1a\x1a.auth.RefreshTokenResponse\"\x00\x12\x35\n\x06Logout\x12\x13.auth.LogoutRequest\x1a\x14.auth.LogoutResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x61uth/auth.proto\x12\x04\x61uth\",\n\x04User\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n\x05\x65mail\x18\x02 \x01(\tR\x05\x65mail\"\xae\x01\n\x06Tokens\x12!\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\tR\x0b\x61\x63\x63\x65ssToken\x12#\n\rrefresh_token\x18\x02 \x01(\tR\x0crefreshToken\x12\x1d\n\ntoken_type\x18\x03 \x01(\tR\ttokenType\x12\x1d\n\nexpires_in\x18\x04 \x01(\x04R\texpiresIn\x12\x1e\n\x04user\x18\x05 \x01(\x0b\x32\n.auth.UserR\x04user\"\'\n\x0fRegisterRequest\x12\x14\n\x05\x65mail\x18\x01 \x01(\tR\x05\x65mail\"\x12\n\x10RegisterResponse\"$\n\x0cLoginRequest\x12\x14\n\x05\x65mail\x18\x01 \x01(\tR\x05\x65mail\"#\n\rLoginResponse\x12\x12\n\x04\x63ode\x18\x01 \x01(\tR\x04\x63ode\"0\n\x18GenerateMagicLinkRequest\x12\x14\n\x05\x65mail\x18\x01 \x01(\tR\x05\x65mail\"_\n\x19GenerateMagicLinkResponse\x12#\n\rrefresh_token\x18\x01 \x01(\tR\x0crefreshToken\x12\x1d\n\nexpires_in\x18\x02 \x01(\x04R\texpiresIn\"<\n\x12ValidateOTPRequest\x12\x14\n\x05\x65mail\x18\x01 \x01(\tR\x05\x65mail\x12\x10\n\x03otp\x18\x02 \x01(\tR\x03otp\";\n\x13ValidateOTPResponse\x12$\n\x06tokens\x18\x01 \x01(\x0b\x32\x0c.auth.TokensR\x06tokens\"9\n\x14ValidateTokenRequest\x12!\n\x0c\x61\x63\x63\x65ss_token\x18\x01 \x01(\tR\x0b\x61\x63\x63\x65ssToken\"-\n\x15ValidateTokenResponse\x12\x14\n\x05valid\x18\x01 \x01(\x08R\x05valid\":\n\x13RefreshTokenRequest\x12#\n\rrefresh_token\x18\x01 \x01(\tR\x0crefreshToken\"<\n\x14RefreshTokenResponse\x12$\n\x06tokens\x18\x01 \x01(\x0b\x32\x0c.auth.TokensR\x06tokens\"4\n\rLogoutRequest\x12#\n\rrefresh_token\x18\x01 \x01(\tR\x0crefreshToken\"\x10\n\x0eLogoutResponse2\xe1\x03\n\x04\x41uth\x12;\n\x08Register\x12\x15.auth.RegisterRequest\x1a\x16.auth.RegisterResponse\"\x00\x12\x32\n\x05Login\x12\x12.auth.LoginRequest\x1a\x13.auth.LoginResponse\"\x00\x12V\n\x11GenerateMagicLink\x12\x1e.auth.GenerateMagicLinkRequest\x1a\x1f.auth.GenerateMagicLinkResponse\"\x00\x12\x44\n\x0bValidateOTP\x12\x18.auth.ValidateOTPRequest\x1a\x19.auth.ValidateOTPResponse\"\x00\x12J\n\rValidateToken\x12\x1a.auth.ValidateTokenRequest\x1a\x1b.auth.ValidateTokenResponse\"\x00\x12G\n\x0cRefreshToken\x12\x19.auth.RefreshTokenRequest\x1a\x1a.auth.RefreshTokenResponse\"\x00\x12\x35\n\x06Logout\x12\x13.auth.LogoutRequest\x1a\x14.auth.LogoutResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,22 +33,26 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_LOGINREQUEST']._serialized_end=345
   _globals['_LOGINRESPONSE']._serialized_start=347
   _globals['_LOGINRESPONSE']._serialized_end=382
-  _globals['_VALIDATEOTPREQUEST']._serialized_start=384
-  _globals['_VALIDATEOTPREQUEST']._serialized_end=444
-  _globals['_VALIDATEOTPRESPONSE']._serialized_start=446
-  _globals['_VALIDATEOTPRESPONSE']._serialized_end=505
-  _globals['_VALIDATETOKENREQUEST']._serialized_start=507
-  _globals['_VALIDATETOKENREQUEST']._serialized_end=564
-  _globals['_VALIDATETOKENRESPONSE']._serialized_start=566
-  _globals['_VALIDATETOKENRESPONSE']._serialized_end=611
-  _globals['_REFRESHTOKENREQUEST']._serialized_start=613
-  _globals['_REFRESHTOKENREQUEST']._serialized_end=671
-  _globals['_REFRESHTOKENRESPONSE']._serialized_start=673
-  _globals['_REFRESHTOKENRESPONSE']._serialized_end=733
-  _globals['_LOGOUTREQUEST']._serialized_start=735
-  _globals['_LOGOUTREQUEST']._serialized_end=787
-  _globals['_LOGOUTRESPONSE']._serialized_start=789
-  _globals['_LOGOUTRESPONSE']._serialized_end=805
-  _globals['_AUTH']._serialized_start=808
-  _globals['_AUTH']._serialized_end=1201
+  _globals['_GENERATEMAGICLINKREQUEST']._serialized_start=384
+  _globals['_GENERATEMAGICLINKREQUEST']._serialized_end=432
+  _globals['_GENERATEMAGICLINKRESPONSE']._serialized_start=434
+  _globals['_GENERATEMAGICLINKRESPONSE']._serialized_end=529
+  _globals['_VALIDATEOTPREQUEST']._serialized_start=531
+  _globals['_VALIDATEOTPREQUEST']._serialized_end=591
+  _globals['_VALIDATEOTPRESPONSE']._serialized_start=593
+  _globals['_VALIDATEOTPRESPONSE']._serialized_end=652
+  _globals['_VALIDATETOKENREQUEST']._serialized_start=654
+  _globals['_VALIDATETOKENREQUEST']._serialized_end=711
+  _globals['_VALIDATETOKENRESPONSE']._serialized_start=713
+  _globals['_VALIDATETOKENRESPONSE']._serialized_end=758
+  _globals['_REFRESHTOKENREQUEST']._serialized_start=760
+  _globals['_REFRESHTOKENREQUEST']._serialized_end=818
+  _globals['_REFRESHTOKENRESPONSE']._serialized_start=820
+  _globals['_REFRESHTOKENRESPONSE']._serialized_end=880
+  _globals['_LOGOUTREQUEST']._serialized_start=882
+  _globals['_LOGOUTREQUEST']._serialized_end=934
+  _globals['_LOGOUTRESPONSE']._serialized_start=936
+  _globals['_LOGOUTRESPONSE']._serialized_end=952
+  _globals['_AUTH']._serialized_start=955
+  _globals['_AUTH']._serialized_end=1436
 # @@protoc_insertion_point(module_scope)

@@ -10,3 +10,6 @@ mod refresh_token;
 pub use refresh_token::refresh_token;
 mod logout;
 pub use logout::logout;
+mod generate_magic_link;
+pub use generate_magic_link::generate_magic_link;
+
