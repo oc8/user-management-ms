@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='grpc-user-management-auth',
+    name='auth',
     version='1.0.2',
-    package_dir={'grpc_user_management_auth': 'gen/src/python'},
+    package_dir={'auth': 'gen/src/python'},
     install_requires=[
         'betterproto',
     ],
