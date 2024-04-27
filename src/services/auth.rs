@@ -88,7 +88,6 @@ impl Auth for AuthService {
         &self,
         request: Request<LogoutRequest>
     ) -> Result<Response<LogoutResponse>, Status> {
-        let mut conn = get_connection(&self.pool)?;
         let mut r_conn = get_redis_connection(&self.r_client)?;
         rpcs::logout(request.into_inner(), &mut r_conn).map(Response::new)
     }

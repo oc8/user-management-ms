@@ -2,7 +2,6 @@ use std::env;
 use tonic::{Status};
 use protos::auth::{LogoutRequest, LogoutResponse};
 use user_management::store_token;
-use crate::database::PgPooledConnection;
 use crate::errors;
 use crate::validations::validate_logout_request;
 
