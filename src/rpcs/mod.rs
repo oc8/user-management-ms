@@ -8,3 +8,5 @@ mod validate_token;
 pub use validate_token::validate_token;
 mod refresh_token;
 pub use refresh_token::refresh_token;
+mod logout;
+pub use logout::logout;

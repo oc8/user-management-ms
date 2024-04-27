@@ -1,5 +1,6 @@
 use std::env;
 use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
+use redis::{Commands, RedisResult};
 
 pub fn init_service_logging() {
     env_logger::builder()
@@ -42,4 +43,14 @@ pub fn create_socket_addr(port: u16) -> SocketAddr {
         log::info!("Using IPv4");
         SocketAddr::from(([0, 0, 0, 0], port))
     }
+}
+
+pub fn store_token(conn: &mut redis::Connection, token: &str, expiration_seconds: usize) -> RedisResult<()> {
+    conn.set_ex(token, expiration_seconds, expiration_seconds as u64)?;
+    Ok(())
+}
+
+pub fn is_token_valid(conn: &mut redis::Connection, token: &str) -> RedisResult<bool> {
+    let exists: bool = conn.exists(token)?;
+    Ok(!exists)
 }

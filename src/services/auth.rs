@@ -5,7 +5,7 @@ use chrono::Utc;
 use tonic::{Code, Request, Response, Status};
 use jsonwebtoken::{encode, EncodingKey, Header};
 
-use protos::auth::{auth_server::Auth, RegisterRequest, User as UserProto, Tokens, LoginRequest, RegisterResponse, LoginResponse, ValidateOtpRequest, ValidateOtpResponse, ValidateTokenRequest, ValidateTokenResponse, RefreshTokenRequest, RefreshTokenResponse};
+use protos::auth::{auth_server::Auth, User as UserProto, *};
 use serde::{Deserialize, Serialize};
 use crate::database::{PgPool, PgPooledConnection};
 use crate::models::user::User;
@@ -40,35 +40,57 @@ impl Auth for AuthService {
     async fn register(
         &self,
         request: Request<RegisterRequest>,
-    )-> Result<Response<RegisterResponse>, Status> {
+    ) -> Result<Response<RegisterResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
         rpcs::register(request.into_inner(), &mut conn).map(Response::new)
     }
 
     #[autometrics]
-    async fn login(&self, request: Request<LoginRequest>) -> Result<Response<LoginResponse>, Status> {
+    async fn login(
+        &self,
+        request: Request<LoginRequest>,
+    ) -> Result<Response<LoginResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
         let mut r_conn = get_redis_connection(&self.r_client)?;
         rpcs::login(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
     #[autometrics]
-    async fn validate_otp(&self, request: Request<ValidateOtpRequest>) -> Result<Response<ValidateOtpResponse>, Status> {
+    async fn validate_otp(
+        &self,
+        request: Request<ValidateOtpRequest>,
+    ) -> Result<Response<ValidateOtpResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
         let mut r_conn = get_redis_connection(&self.r_client)?;
         rpcs::validate_otp(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
     #[autometrics]
-    async fn validate_token(&self, request: Request<ValidateTokenRequest>) -> Result<Response<ValidateTokenResponse>, Status> {
+    async fn validate_token(
+        &self,
+        request: Request<ValidateTokenRequest>,
+    ) -> Result<Response<ValidateTokenResponse>, Status> {
         rpcs::validate_token(request.into_inner()).map(Response::new)
     }
 
     #[autometrics]
-    async fn refresh_token(&self, request: Request<RefreshTokenRequest>) -> Result<Response<RefreshTokenResponse>, Status> {
+    async fn refresh_token(
+        &self,
+        request: Request<RefreshTokenRequest>,
+    ) -> Result<Response<RefreshTokenResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
         let mut r_conn = get_redis_connection(&self.r_client)?;
         rpcs::refresh_token(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
+    }
+
+    #[autometrics]
+    async fn logout(
+        &self,
+        request: Request<LogoutRequest>
+    ) -> Result<Response<LogoutResponse>, Status> {
+        let mut conn = get_connection(&self.pool)?;
+        let mut r_conn = get_redis_connection(&self.r_client)?;
+        rpcs::logout(request.into_inner(), &mut r_conn).map(Response::new)
     }
 }
 
@@ -107,9 +129,11 @@ pub(crate) fn generate_access_token(user: &User) -> Result<Token, Box<dyn std::e
         .parse()
         .map_err(|_| "Failed to parse ACCESS_TOKEN_TTL")?;
 
-    let issuer = env::var("JWT_ISSUER").map_err(|_| "JWT_ISSUER must be set")?;
+    let issuer = env::var("JWT_ISSUER")
+        .map_err(|_| "JWT_ISSUER must be set")?;
 
-    let jwt_secret = env::var("ACCESS_TOKEN_SECRET").map_err(|_| "ACCESS_TOKEN_SECRET must be set")?;
+    let jwt_secret = env::var("ACCESS_TOKEN_SECRET")
+        .map_err(|_| "ACCESS_TOKEN_SECRET must be set")?;
 
     let exp = Utc::now().timestamp() + access_token_expiration as i64;
 
@@ -139,9 +163,11 @@ pub(crate) fn generate_refresh_token(user: &User) -> Result<Token, Box<dyn std::
         .parse()
         .map_err(|_| "Failed to parse REFRESH_TOKEN_TTL")?;
 
-    let issuer = env::var("JWT_ISSUER").map_err(|_| "JWT_ISSUER must be set")?;
+    let issuer = env::var("JWT_ISSUER")
+        .map_err(|_| "JWT_ISSUER must be set")?;
 
-    let jwt_secret = env::var("REFRESH_TOKEN_SECRET").map_err(|_| "REFRESH_TOKEN_SECRET must be set")?;
+    let jwt_secret = env::var("REFRESH_TOKEN_SECRET")
+        .map_err(|_| "REFRESH_TOKEN_SECRET must be set")?;
 
     let exp = Utc::now().timestamp() + refresh_token_expiration as i64;
 

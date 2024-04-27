@@ -1,25 +1,14 @@
 use std::env;
 use jsonwebtoken::{decode, DecodingKey, Validation};
-use redis::{Commands, RedisResult};
 use tonic::{Status};
 use uuid::Uuid;
 use protos::auth::{RefreshTokenRequest, RefreshTokenResponse};
-use user_management::report_error;
+use user_management::{is_token_valid, report_error, store_token};
 use crate::database::PgPooledConnection;
 use crate::errors::errors;
 use crate::models::user::User;
 use crate::services::auth::{Claims, generate_tokens};
 use crate::validations::{validate_refresh_token_request};
-
-fn store_refresh_token(conn: &mut redis::Connection, token: &str, expiration_seconds: usize) -> RedisResult<()> {
-    conn.set_ex(token, expiration_seconds, expiration_seconds as u64)?;
-    Ok(())
-}
-
-fn is_refresh_token_valid(conn: &mut redis::Connection, token: &str) -> RedisResult<bool> {
-    let exists: bool = conn.exists(token)?;
-    Ok(!exists)
-}
 
 pub fn refresh_token(
     request: RefreshTokenRequest,
@@ -28,7 +17,7 @@ pub fn refresh_token(
 ) -> Result<RefreshTokenResponse, Status> {
     validate_refresh_token_request(&request)?;
 
-    let token_valid = is_refresh_token_valid(r_conn, &request.refresh_token)
+    let token_valid = is_token_valid(r_conn, &request.refresh_token)
         .map_err(|_|  Status::internal(errors::INTERNAL))?;
 
     if !token_valid {
@@ -53,7 +42,7 @@ pub fn refresh_token(
 
             let refresh_token_ttl = env::var("REFRESH_TOKEN_TTL").expect("REFRESH_TOKEN_TTL must be set").parse::<usize>().unwrap();
 
-            store_refresh_token(r_conn, &request.refresh_token, refresh_token_ttl)
+            store_token(r_conn, &request.refresh_token, refresh_token_ttl)
                 .map_err(|e| {
                     report_error(e);
                     Status::internal(errors::INTERNAL)

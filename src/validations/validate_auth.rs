@@ -1,5 +1,5 @@
 use tonic::{Code, Status};
-use protos::auth::{LoginRequest, RefreshTokenRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
+use protos::auth::{LoginRequest, LogoutRequest, RefreshTokenRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
 use validator::{ValidateEmail};
 use crate::errors;
 
@@ -45,6 +45,16 @@ pub fn validate_token_request(req: &ValidateTokenRequest) -> Result<(), Status> 
 }
 
 pub fn validate_refresh_token_request(req: &RefreshTokenRequest) -> Result<(), Status> {
+    if req.refresh_token.len() > 0 {
+        Ok(())
+    } else {
+        Err(Status::new(
+            Code::InvalidArgument, errors::INVALID_TOKEN_FORMAT,
+        ))
+    }
+}
+
+pub fn validate_logout_request(req: &LogoutRequest) -> Result<(), Status> {
     if req.refresh_token.len() > 0 {
         Ok(())
     } else {
