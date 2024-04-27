@@ -36,7 +36,6 @@ impl Clone for AuthService {
 #[tonic::async_trait]
 #[autometrics(objective = API_SLO)]
 impl Auth for AuthService {
-    #[autometrics]
     async fn register(
         &self,
         request: Request<RegisterRequest>,
@@ -45,13 +44,6 @@ impl Auth for AuthService {
         rpcs::register(request.into_inner(), &mut conn).map(Response::new)
     }
 
-    #[autometrics]
-    async fn generate_magic_link(&self, request: Request<GenerateMagicLinkRequest>) -> Result<Response<GenerateMagicLinkResponse>, Status> {
-        let mut conn = get_connection(&self.pool)?;
-        rpcs::generate_magic_link(request.into_inner(), &mut conn).map(Response::new)
-    }
-
-    #[autometrics]
     async fn login(
         &self,
         request: Request<LoginRequest>,
@@ -61,7 +53,11 @@ impl Auth for AuthService {
         rpcs::login(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
-    #[autometrics]
+    async fn generate_magic_link(&self, request: Request<GenerateMagicLinkRequest>) -> Result<Response<GenerateMagicLinkResponse>, Status> {
+        let mut conn = get_connection(&self.pool)?;
+        rpcs::generate_magic_link(request.into_inner(), &mut conn).map(Response::new)
+    }
+
     async fn validate_otp(
         &self,
         request: Request<ValidateOtpRequest>,
@@ -71,7 +67,6 @@ impl Auth for AuthService {
         rpcs::validate_otp(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
-    #[autometrics]
     async fn validate_token(
         &self,
         request: Request<ValidateTokenRequest>,
@@ -79,7 +74,6 @@ impl Auth for AuthService {
         rpcs::validate_token(request.into_inner()).map(Response::new)
     }
 
-    #[autometrics]
     async fn refresh_token(
         &self,
         request: Request<RefreshTokenRequest>,
@@ -89,7 +83,6 @@ impl Auth for AuthService {
         rpcs::refresh_token(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
-    #[autometrics]
     async fn logout(
         &self,
         request: Request<LogoutRequest>
