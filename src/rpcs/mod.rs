@@ -12,4 +12,5 @@ mod logout;
 pub use logout::logout;
 mod generate_magic_link;
 pub use generate_magic_link::generate_magic_link;
-
+mod validate_magic_link;
+pub use validate_magic_link::validate_magic_link;

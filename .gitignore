@@ -2,4 +2,4 @@
 .env
 .idea
 dist
-grpc_user_management_auth.egg-info
+auth.egg-info

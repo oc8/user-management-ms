@@ -56,7 +56,7 @@ pub fn is_token_valid(conn: &mut redis::Connection, token: &str) -> RedisResult<
     Ok(!exists)
 }
 
-pub fn generate_opt_secret() -> String {
+pub fn generate_secret() -> String {
     let mut secret_key = vec![0u8; 20];
     rand::thread_rng().fill(&mut secret_key[..]);
 

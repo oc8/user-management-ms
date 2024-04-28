@@ -98,19 +98,12 @@ impl serde::Serialize for GenerateMagicLinkResponse {
     {
         use serde::ser::SerializeStruct;
         let mut len = 0;
-        if !self.refresh_token.is_empty() {
-            len += 1;
-        }
-        if self.expires_in != 0 {
+        if !self.code.is_empty() {
             len += 1;
         }
         let mut struct_ser = serializer.serialize_struct("auth.GenerateMagicLinkResponse", len)?;
-        if !self.refresh_token.is_empty() {
-            struct_ser.serialize_field("refreshToken", &self.refresh_token)?;
-        }
-        if self.expires_in != 0 {
-            #[allow(clippy::needless_borrow)]
-            struct_ser.serialize_field("expiresIn", ToString::to_string(&self.expires_in).as_str())?;
+        if !self.code.is_empty() {
+            struct_ser.serialize_field("code", &self.code)?;
         }
         struct_ser.end()
     }
@@ -122,16 +115,12 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkResponse {
         D: serde::Deserializer<'de>,
     {
         const FIELDS: &[&str] = &[
-            "refresh_token",
-            "refreshToken",
-            "expires_in",
-            "expiresIn",
+            "code",
         ];
 
         #[allow(clippy::enum_variant_names)]
         enum GeneratedField {
-            RefreshToken,
-            ExpiresIn,
+            Code,
         }
         impl<'de> serde::Deserialize<'de> for GeneratedField {
             fn deserialize<D>(deserializer: D) -> std::result::Result<GeneratedField, D::Error>
@@ -153,8 +142,7 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkResponse {
                         E: serde::de::Error,
                     {
                         match value {
-                            "refreshToken" | "refresh_token" => Ok(GeneratedField::RefreshToken),
-                            "expiresIn" | "expires_in" => Ok(GeneratedField::ExpiresIn),
+                            "code" => Ok(GeneratedField::Code),
                             _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
                         }
                     }
@@ -174,29 +162,19 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkResponse {
                 where
                     V: serde::de::MapAccess<'de>,
             {
-                let mut refresh_token__ = None;
-                let mut expires_in__ = None;
+                let mut code__ = None;
                 while let Some(k) = map_.next_key()? {
                     match k {
-                        GeneratedField::RefreshToken => {
-                            if refresh_token__.is_some() {
-                                return Err(serde::de::Error::duplicate_field("refreshToken"));
+                        GeneratedField::Code => {
+                            if code__.is_some() {
+                                return Err(serde::de::Error::duplicate_field("code"));
                             }
-                            refresh_token__ = Some(map_.next_value()?);
-                        }
-                        GeneratedField::ExpiresIn => {
-                            if expires_in__.is_some() {
-                                return Err(serde::de::Error::duplicate_field("expiresIn"));
-                            }
-                            expires_in__ = 
-                                Some(map_.next_value::<::pbjson::private::NumberDeserialize<_>>()?.0)
-                            ;
+                            code__ = Some(map_.next_value()?);
                         }
                     }
                 }
                 Ok(GenerateMagicLinkResponse {
-                    refresh_token: refresh_token__.unwrap_or_default(),
-                    expires_in: expires_in__.unwrap_or_default(),
+                    code: code__.unwrap_or_default(),
                 })
             }
         }
@@ -1165,6 +1143,205 @@ impl<'de> serde::Deserialize<'de> for User {
             }
         }
         deserializer.deserialize_struct("auth.User", FIELDS, GeneratedVisitor)
+    }
+}
+impl serde::Serialize for ValidateMagicLinkRequest {
+    #[allow(deprecated)]
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeStruct;
+        let mut len = 0;
+        if !self.email.is_empty() {
+            len += 1;
+        }
+        if !self.code.is_empty() {
+            len += 1;
+        }
+        let mut struct_ser = serializer.serialize_struct("auth.ValidateMagicLinkRequest", len)?;
+        if !self.email.is_empty() {
+            struct_ser.serialize_field("email", &self.email)?;
+        }
+        if !self.code.is_empty() {
+            struct_ser.serialize_field("code", &self.code)?;
+        }
+        struct_ser.end()
+    }
+}
+impl<'de> serde::Deserialize<'de> for ValidateMagicLinkRequest {
+    #[allow(deprecated)]
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const FIELDS: &[&str] = &[
+            "email",
+            "code",
+        ];
+
+        #[allow(clippy::enum_variant_names)]
+        enum GeneratedField {
+            Email,
+            Code,
+        }
+        impl<'de> serde::Deserialize<'de> for GeneratedField {
+            fn deserialize<D>(deserializer: D) -> std::result::Result<GeneratedField, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct GeneratedVisitor;
+
+                impl<'de> serde::de::Visitor<'de> for GeneratedVisitor {
+                    type Value = GeneratedField;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                        write!(formatter, "expected one of: {:?}", &FIELDS)
+                    }
+
+                    #[allow(unused_variables)]
+                    fn visit_str<E>(self, value: &str) -> std::result::Result<GeneratedField, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "email" => Ok(GeneratedField::Email),
+                            "code" => Ok(GeneratedField::Code),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+                deserializer.deserialize_identifier(GeneratedVisitor)
+            }
+        }
+        struct GeneratedVisitor;
+        impl<'de> serde::de::Visitor<'de> for GeneratedVisitor {
+            type Value = ValidateMagicLinkRequest;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                formatter.write_str("struct auth.ValidateMagicLinkRequest")
+            }
+
+            fn visit_map<V>(self, mut map_: V) -> std::result::Result<ValidateMagicLinkRequest, V::Error>
+                where
+                    V: serde::de::MapAccess<'de>,
+            {
+                let mut email__ = None;
+                let mut code__ = None;
+                while let Some(k) = map_.next_key()? {
+                    match k {
+                        GeneratedField::Email => {
+                            if email__.is_some() {
+                                return Err(serde::de::Error::duplicate_field("email"));
+                            }
+                            email__ = Some(map_.next_value()?);
+                        }
+                        GeneratedField::Code => {
+                            if code__.is_some() {
+                                return Err(serde::de::Error::duplicate_field("code"));
+                            }
+                            code__ = Some(map_.next_value()?);
+                        }
+                    }
+                }
+                Ok(ValidateMagicLinkRequest {
+                    email: email__.unwrap_or_default(),
+                    code: code__.unwrap_or_default(),
+                })
+            }
+        }
+        deserializer.deserialize_struct("auth.ValidateMagicLinkRequest", FIELDS, GeneratedVisitor)
+    }
+}
+impl serde::Serialize for ValidateMagicLinkResponse {
+    #[allow(deprecated)]
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeStruct;
+        let mut len = 0;
+        if self.tokens.is_some() {
+            len += 1;
+        }
+        let mut struct_ser = serializer.serialize_struct("auth.ValidateMagicLinkResponse", len)?;
+        if let Some(v) = self.tokens.as_ref() {
+            struct_ser.serialize_field("tokens", v)?;
+        }
+        struct_ser.end()
+    }
+}
+impl<'de> serde::Deserialize<'de> for ValidateMagicLinkResponse {
+    #[allow(deprecated)]
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        const FIELDS: &[&str] = &[
+            "tokens",
+        ];
+
+        #[allow(clippy::enum_variant_names)]
+        enum GeneratedField {
+            Tokens,
+        }
+        impl<'de> serde::Deserialize<'de> for GeneratedField {
+            fn deserialize<D>(deserializer: D) -> std::result::Result<GeneratedField, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct GeneratedVisitor;
+
+                impl<'de> serde::de::Visitor<'de> for GeneratedVisitor {
+                    type Value = GeneratedField;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                        write!(formatter, "expected one of: {:?}", &FIELDS)
+                    }
+
+                    #[allow(unused_variables)]
+                    fn visit_str<E>(self, value: &str) -> std::result::Result<GeneratedField, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        match value {
+                            "tokens" => Ok(GeneratedField::Tokens),
+                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
+                        }
+                    }
+                }
+                deserializer.deserialize_identifier(GeneratedVisitor)
+            }
+        }
+        struct GeneratedVisitor;
+        impl<'de> serde::de::Visitor<'de> for GeneratedVisitor {
+            type Value = ValidateMagicLinkResponse;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                formatter.write_str("struct auth.ValidateMagicLinkResponse")
+            }
+
+            fn visit_map<V>(self, mut map_: V) -> std::result::Result<ValidateMagicLinkResponse, V::Error>
+                where
+                    V: serde::de::MapAccess<'de>,
+            {
+                let mut tokens__ = None;
+                while let Some(k) = map_.next_key()? {
+                    match k {
+                        GeneratedField::Tokens => {
+                            if tokens__.is_some() {
+                                return Err(serde::de::Error::duplicate_field("tokens"));
+                            }
+                            tokens__ = map_.next_value()?;
+                        }
+                    }
+                }
+                Ok(ValidateMagicLinkResponse {
+                    tokens: tokens__,
+                })
+            }
+        }
+        deserializer.deserialize_struct("auth.ValidateMagicLinkResponse", FIELDS, GeneratedVisitor)
     }
 }
 impl serde::Serialize for ValidateOtpRequest {

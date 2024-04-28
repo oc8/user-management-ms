@@ -1,5 +1,5 @@
 use tonic::{Code, Status};
-use protos::auth::{GenerateMagicLinkRequest, LoginRequest, LogoutRequest, RefreshTokenRequest, RegisterRequest, ValidateOtpRequest, ValidateTokenRequest};
+use protos::auth::{GenerateMagicLinkRequest, LoginRequest, LogoutRequest, RefreshTokenRequest, RegisterRequest, ValidateMagicLinkRequest, ValidateOtpRequest, ValidateTokenRequest};
 use validator::{ValidateEmail};
 use crate::errors;
 
@@ -71,5 +71,16 @@ pub fn validate_generate_magic_link_request(req: &GenerateMagicLinkRequest) -> R
         Err(Status::new(
             Code::InvalidArgument, errors::INVALID_EMAIL_FORMAT,
         ))
+    }
+}
+
+pub fn validate_magic_link_request(req: &ValidateMagicLinkRequest) -> Result<(), Status> {
+    if req.email.validate_email() && req.code.len() > 0 {
+        Ok(())
+    } else {
+        if !req.email.validate_email() {
+            return Err(Status::new(Code::InvalidArgument, errors::INVALID_EMAIL_FORMAT));
+        }
+        return Err(Status::new(Code::InvalidArgument, errors::INVALID_MAGIC_CODE_FORMAT));
     }
 }

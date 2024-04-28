@@ -6,6 +6,7 @@ service Auth {
   rpc Register (RegisterRequest) returns (RegisterResponse) {}
   rpc Login (LoginRequest) returns (LoginResponse) {}
   rpc GenerateMagicLink (GenerateMagicLinkRequest) returns (GenerateMagicLinkResponse) {}
+  rpc ValidateMagicLink (ValidateMagicLinkRequest) returns (ValidateMagicLinkResponse) {}
   rpc ValidateOTP (ValidateOTPRequest) returns (ValidateOTPResponse) {}
   rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse) {}
   rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {}
@@ -44,8 +45,16 @@ message GenerateMagicLinkRequest {
 }
 
 message GenerateMagicLinkResponse {
-  string refresh_token = 1;
-  uint64 expires_in = 2;
+  string code = 1;
+}
+
+message ValidateMagicLinkRequest {
+  string email = 1;
+  string code = 2;
+}
+
+message ValidateMagicLinkResponse {
+  Tokens tokens = 1;
 }
 
 message ValidateOTPRequest {

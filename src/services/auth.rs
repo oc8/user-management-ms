@@ -55,7 +55,14 @@ impl Auth for AuthService {
 
     async fn generate_magic_link(&self, request: Request<GenerateMagicLinkRequest>) -> Result<Response<GenerateMagicLinkResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
-        rpcs::generate_magic_link(request.into_inner(), &mut conn).map(Response::new)
+        let mut r_conn = get_redis_connection(&self.r_client)?;
+        rpcs::generate_magic_link(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
+    }
+
+    async fn validate_magic_link(&self, request: Request<ValidateMagicLinkRequest>) -> Result<Response<ValidateMagicLinkResponse>, Status> {
+        let mut conn = get_connection(&self.pool)?;
+        let mut r_conn = get_redis_connection(&self.r_client)?;
+        rpcs::validate_magic_link(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
     async fn validate_otp(

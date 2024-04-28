@@ -49,8 +49,18 @@ class GenerateMagicLinkRequest(betterproto.Message):
 
 @dataclass
 class GenerateMagicLinkResponse(betterproto.Message):
-    refresh_token: str = betterproto.string_field(1)
-    expires_in: int = betterproto.uint64_field(2)
+    code: str = betterproto.string_field(1)
+
+
+@dataclass
+class ValidateMagicLinkRequest(betterproto.Message):
+    email: str = betterproto.string_field(1)
+    code: str = betterproto.string_field(2)
+
+
+@dataclass
+class ValidateMagicLinkResponse(betterproto.Message):
+    tokens: "Tokens" = betterproto.message_field(1)
 
 
 @dataclass
@@ -125,6 +135,19 @@ class AuthStub(betterproto.ServiceStub):
             "/auth.Auth/GenerateMagicLink",
             request,
             GenerateMagicLinkResponse,
+        )
+
+    async def validate_magic_link(
+        self, *, email: str = "", code: str = ""
+    ) -> ValidateMagicLinkResponse:
+        request = ValidateMagicLinkRequest()
+        request.email = email
+        request.code = code
+
+        return await self._unary_unary(
+            "/auth.Auth/ValidateMagicLink",
+            request,
+            ValidateMagicLinkResponse,
         )
 
     async def validate_o_t_p(
