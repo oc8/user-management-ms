@@ -8,4 +8,6 @@ pub const INVALID_OTP_FORMAT: &str = "invalid_otp_format";
 pub const INVALID_TOKEN: &str = "invalid_token";
 pub const INVALID_TOKEN_FORMAT: &str = "invalid_token_format";
 pub const INVALID_REFRESH_TOKEN: &str = "invalid_refresh_token";
+pub const INVALID_MAGIC_CODE_FORMAT: &str = "invalid_magic_code_format";
+pub const INVALID_MAGIC_CODE: &str = "invalid_magic_code";
 pub const USER_NOT_FOUND: &str = "user_not_found";

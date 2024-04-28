@@ -150,6 +150,31 @@ pub mod auth_client {
                 .insert(GrpcMethod::new("auth.Auth", "GenerateMagicLink"));
             self.inner.unary(req, path, codec).await
         }
+        pub async fn validate_magic_link(
+            &mut self,
+            request: impl tonic::IntoRequest<super::ValidateMagicLinkRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ValidateMagicLinkResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/auth.Auth/ValidateMagicLink",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(GrpcMethod::new("auth.Auth", "ValidateMagicLink"));
+            self.inner.unary(req, path, codec).await
+        }
         pub async fn validate_otp(
             &mut self,
             request: impl tonic::IntoRequest<super::ValidateOtpRequest>,
@@ -260,6 +285,13 @@ pub mod auth_server {
             request: tonic::Request<super::GenerateMagicLinkRequest>,
         ) -> std::result::Result<
             tonic::Response<super::GenerateMagicLinkResponse>,
+            tonic::Status,
+        >;
+        async fn validate_magic_link(
+            &self,
+            request: tonic::Request<super::ValidateMagicLinkRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::ValidateMagicLinkResponse>,
             tonic::Status,
         >;
         async fn validate_otp(
@@ -486,6 +518,52 @@ pub mod auth_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = GenerateMagicLinkSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/auth.Auth/ValidateMagicLink" => {
+                    #[allow(non_camel_case_types)]
+                    struct ValidateMagicLinkSvc<T: Auth>(pub Arc<T>);
+                    impl<
+                        T: Auth,
+                    > tonic::server::UnaryService<super::ValidateMagicLinkRequest>
+                    for ValidateMagicLinkSvc<T> {
+                        type Response = super::ValidateMagicLinkResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::ValidateMagicLinkRequest>,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as Auth>::validate_magic_link(&inner, request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = ValidateMagicLinkSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

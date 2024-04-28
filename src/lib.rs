@@ -1,5 +1,6 @@
 use std::env;
 use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
+use rand::Rng;
 use redis::{Commands, RedisResult};
 
 pub fn init_service_logging() {
@@ -53,4 +54,13 @@ pub fn store_token(conn: &mut redis::Connection, token: &str, expiration_seconds
 pub fn is_token_valid(conn: &mut redis::Connection, token: &str) -> RedisResult<bool> {
     let exists: bool = conn.exists(token)?;
     Ok(!exists)
+}
+
+pub fn generate_secret() -> String {
+    let mut secret_key = vec![0u8; 20];
+    rand::thread_rng().fill(&mut secret_key[..]);
+
+    let base32_secret = base32::encode(base32::Alphabet::RFC4648 { padding: false }, &secret_key);
+
+    base32_secret
 }

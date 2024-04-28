@@ -1,19 +1,10 @@
-use rand::Rng;
 use tonic::{Status};
 use protos::auth::{RegisterRequest, RegisterResponse};
 use crate::models::user::{NewUser, User};
 use crate::validations::{validate_register_request};
 use crate::database::PgPooledConnection;
 use crate::errors::errors;
-
-fn generate_opt_secret() -> String {
-    let mut secret_key = vec![0u8; 20];
-    rand::thread_rng().fill(&mut secret_key[..]);
-
-    let base32_secret = base32::encode(base32::Alphabet::RFC4648 { padding: false }, &secret_key);
-
-    base32_secret
-}
+use user_management::generate_secret;
 
 pub fn register(
     request: RegisterRequest,
@@ -21,7 +12,7 @@ pub fn register(
 ) -> Result<RegisterResponse, Status> {
     validate_register_request(&request)?;
 
-    let secret = generate_opt_secret();
+    let secret = generate_secret();
 
     let user = NewUser {
         email: &request.email,
