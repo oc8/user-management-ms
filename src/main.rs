@@ -16,6 +16,8 @@ mod server;
 mod database;
 mod rpcs;
 mod errors;
+#[cfg(test)]
+mod tests;
 
 // mod proto {
 //     tonic::include_proto!("auth");
@@ -30,7 +32,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     init_service_logging();
     prometheus_exporter::init();
 
-    let pool = Arc::new(database::establish_pool());
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = Arc::new(database::establish_pool(database_url));
 
     pool
         .get()

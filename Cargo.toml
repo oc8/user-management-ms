@@ -23,6 +23,11 @@ rand = "0.8.5"
 base32 = "0.4.0"
 autometrics = { version = "1.0.1", features = ["prometheus-exporter"] }
 axum = { version = "0.7.5", features = ["tokio", "http1"]}
+tower = "0.4.13"
+tokio-stream = "0.1.15"
+pbjson = "0.6.0"
+diesel_migrations = "2.1.0"
+futures-util = "0.3.30"
 
 [build-dependencies]
 tonic-build = "0.11.0"

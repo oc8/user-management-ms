@@ -1,6 +1,6 @@
 use redis::Commands;
 use tonic::{Status};
-use protos::auth::{GenerateMagicLinkResponse, ValidateMagicLinkRequest, ValidateMagicLinkResponse};
+use protos::auth::{ValidateMagicLinkRequest, ValidateMagicLinkResponse};
 use crate::database::PgPooledConnection;
 use crate::errors;
 use crate::models::user::{User};
