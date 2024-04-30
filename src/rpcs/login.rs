@@ -4,6 +4,7 @@ use redis::Commands;
 use tonic::{Status};
 use totp_rs::{Algorithm, Secret, TOTP};
 use protos::auth::{LoginRequest, LoginResponse};
+use user_management::report_error;
 use crate::models::user::User;
 use crate::validations::validate_login_request;
 use crate::database::PgPooledConnection;
@@ -22,8 +23,8 @@ pub fn login(
     let otp_ttl = env::var("OTP_TTL").expect("OTP_TTL must be set").parse().unwrap();
 
     let totp = TOTP::new(Algorithm::SHA1, 6, 1, 30, Secret::Encoded(user.otp_secret).to_bytes().unwrap(), None, request.email.clone())
-        .map_err(|_| {
-            // report_error(e);
+        .map_err(|e| {
+            report_error(e);
             Status::internal(errors::INTERNAL)
         })?;
 
@@ -33,8 +34,8 @@ pub fn login(
         &format!("otp:{}", request.email),
         code.clone(),
         otp_ttl,
-    ).map_err(|_| {
-        // report_error(e);
+    ).map_err(|e| {
+        report_error(e);
         Status::internal(errors::INTERNAL)
     })?;
 

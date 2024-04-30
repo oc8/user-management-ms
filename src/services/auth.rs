@@ -196,7 +196,7 @@ pub(crate) fn generate_refresh_token(user: &User) -> Result<Token, Box<dyn std::
     })
 }
 
-fn get_connection(pool: &PgPool) -> Result<PgPooledConnection, Status> {
+pub fn get_connection(pool: &PgPool) -> Result<PgPooledConnection, Status> {
     match pool.get() {
         Err(_) => Err(Status::new(Code::DataLoss, errors::DATABASE_CONNECTION_FAILURE)),
         Ok(conn) => Ok(conn),
