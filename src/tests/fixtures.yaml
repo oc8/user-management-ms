@@ -1,0 +1,11 @@
+fixtures:
+  - model: User
+    fields:
+      id: "7454c93b-5468-4658-91c2-f4daf4ba60fa"
+      email: "test@test.com"
+      otp_secret: "TS7SEWYLP2VOG5CWSENNRRDY46ROJM4C"
+  - model: User
+    fields:
+      id: "fba9698d-75f4-4e08-839c-5548ab46970c"
+      email: "test1@test.com"
+      otp_secret: "2TCK4SSMVWRPOG74DN7WPVJ6DTHFLXHC"

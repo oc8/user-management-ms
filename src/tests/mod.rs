@@ -1,19 +1,16 @@
-use std::env;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use diesel::{Connection, PgConnection};
-use diesel::migration::MigrationSource;
 use diesel::prelude::*;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use redis::Client;
-use tokio::io::Join;
-use tokio::runtime::Handle;
-use crate::database::establish_pool;
+use crate::database::{establish_pool, PgPooledConnection};
 use crate::services::auth::{AuthService, get_connection};
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
 pub mod integration;
+pub mod fixtures;
 
 struct TestContext {
     db_url: String,
@@ -57,6 +54,16 @@ impl TestContext {
             url,
             service: auth,
         }
+    }
+
+    fn mock_database<F>(&self, mut f: F)
+        where
+            F: FnMut(PgPooledConnection),
+    {
+        let conn = get_connection(&self.service.pool)
+            .expect("Cannot connect to database");
+
+        f(conn);
     }
 }
 
