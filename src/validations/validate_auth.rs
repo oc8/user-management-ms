@@ -25,12 +25,13 @@ pub fn validate_login_request(req: &LoginRequest) -> Result<(), Status> {
 
 
 pub fn validate_otp_request(req: &ValidateOtpRequest) -> Result<(), Status> {
-    if req.otp.len() == 6 {
+    if req.email.validate_email() && req.otp.len() > 0 {
         Ok(())
     } else {
-        Err(Status::new(
-            Code::InvalidArgument, errors::INVALID_OTP_FORMAT,
-        ))
+        if !req.email.validate_email() {
+            return Err(Status::new(Code::InvalidArgument, errors::INVALID_EMAIL_FORMAT));
+        }
+        return Err(Status::new(Code::InvalidArgument, errors::INVALID_OTP_FORMAT));
     }
 }
 
