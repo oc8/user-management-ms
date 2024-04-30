@@ -24,3 +24,9 @@ services:
     container_name: "auth-service-redis"
     ports:
       - "6379:6379"
+  redis-test:
+    image: redis:latest
+    restart: always
+    container_name: "auth-service-redis-test"
+    ports:
+      - "6380:6379"

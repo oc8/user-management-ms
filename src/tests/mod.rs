@@ -20,8 +20,10 @@ struct TestContext {
     service: AuthService,
 }
 
+// TODO: Add mock redis server
 impl TestContext {
     fn new(db_url: &str, db_name: &str, r_url: &str, port: u16) -> Self {
+        dotenvy::dotenv().ok();
         let mut conn =
             PgConnection::establish(&format!("{}/postgres", db_url)).expect("Cannot connect to postgres database.");
 
