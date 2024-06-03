@@ -14,7 +14,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y libpq-dev && rm -rf /var/lib/apt/lists/*
 
-RUN cargo install diesel_cli --no-default-features --features postgres
+RUN cargo install diesel_cli --version 2.1.1 --no-default-features --features postgres
 
 COPY --from=build /app/diesel.toml .
 COPY --from=build /app/migrations ./migrations
