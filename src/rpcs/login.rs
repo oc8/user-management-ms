@@ -17,6 +17,8 @@ pub fn login(
 ) -> Result<LoginResponse, Status> {
     validate_login_request(&request)?;
 
+    panic!("validate_login_request");
+
     let user = User::find_by_email(conn, &request.email)
         .ok_or_else(|| Status::not_found(errors::USER_NOT_FOUND))?;
 
