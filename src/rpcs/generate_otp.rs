@@ -17,8 +17,6 @@ pub fn generate_otp(
 ) -> Result<GenerateOtpResponse, Status> {
     validate_generate_otp_request(&request)?;
 
-    panic!("validate_login_request");
-
     let user = User::find_by_email(conn, &request.email)
         .ok_or_else(|| Status::not_found(errors::USER_NOT_FOUND))?;
 
