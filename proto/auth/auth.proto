@@ -2,88 +2,147 @@ syntax = "proto3";
 
 package auth;
 
+/**
+ * Auth service
+ */
 service Auth {
+  /// Register a new user
   rpc Register (RegisterRequest) returns (RegisterResponse) {}
-  rpc Login (LoginRequest) returns (LoginResponse) {}
+  /// Generate an OTP code
+  rpc GenerateOTP (GenerateOTPRequest) returns (GenerateOTPResponse) {}
+  /// Generate a magic link
   rpc GenerateMagicLink (GenerateMagicLinkRequest) returns (GenerateMagicLinkResponse) {}
+  /// Validate a magic link
   rpc ValidateMagicLink (ValidateMagicLinkRequest) returns (ValidateMagicLinkResponse) {}
+  /// Validate an OTP
   rpc ValidateOTP (ValidateOTPRequest) returns (ValidateOTPResponse) {}
+  /// Validate a token
   rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse) {}
+  /// Refresh a token
   rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {}
+  /// Logout a user
   rpc Logout (LogoutRequest) returns (LogoutResponse) {}
 }
 
+/**
+ * Represent a user
+ */
 message User {
-  string id = 1;
-  string email = 2;
+  string id = 1; /// Unique user ID
+  string email = 2; /// Unique user email address
 }
 
+/**
+ * Represent a pair of tokens
+ */
 message Tokens {
-  string access_token = 1;
-  string refresh_token = 2;
-  string token_type = 3;
-  uint64 expires_in = 4;
-  User user = 5;
+  string access_token = 1; /// Access token
+  string refresh_token = 2; /// Refresh token
+  string token_type = 3; /// Token type (Bearer)
+  uint64 expires_in = 4; /// Token expiration time
+  User user = 5; /// User
 }
 
+/**
+ * Used to register a new user
+ */
 message RegisterRequest {
-  string email = 1;
+  string email = 1; /// Unique user email address (validation: required, email)
 }
 
 message RegisterResponse {}
 
-message LoginRequest {
-  string email = 1;
+/**
+ * Used to generate an OTP code
+ */
+message GenerateOTPRequest {
+  string email = 1; /// Unique user email address (validation: required, email)
 }
 
-message LoginResponse {
-  string code = 1;
+/**
+ * Response to an OTP generation request
+ */
+message GenerateOTPResponse {
+  string code = 1; /// OTP code
 }
 
+/**
+ * Used to generate a magic link
+ */
 message GenerateMagicLinkRequest {
-  string email = 1;
+  string email = 1; /// Unique user email address (validation: required, email)
 }
 
+/**
+ * Response to a magic link generation request
+ */
 message GenerateMagicLinkResponse {
-  string code = 1;
+  string code = 1; /// Magic link code
 }
 
+/**
+ * Used to validate a magic link
+ */
 message ValidateMagicLinkRequest {
-  string email = 1;
-  string code = 2;
+  string email = 1; /// Unique user email address (validation: required, email)
+  string code = 2; /// Magic link code (validation: required)
 }
 
+/**
+ * Response to a magic link validation request
+ */
 message ValidateMagicLinkResponse {
-  Tokens tokens = 1;
+  Tokens tokens = 1; /// Generated tokens
 }
 
+/**
+ * Used to validate an OTP
+ */
 message ValidateOTPRequest {
-  string email = 1;
-  string otp = 2;
+  string email = 1; /// Unique user email address (validation: required, email)
+  string otp = 2; /// OTP code (validation: required)
 }
 
+/**
+ * Response to an OTP validation request
+ */
 message ValidateOTPResponse {
-  Tokens tokens = 1;
+  Tokens tokens = 1; /// Generated tokens
 }
 
+/**
+ * Used to validate a token
+ */
 message ValidateTokenRequest {
-  string access_token = 1;
+  string access_token = 1; /// Access token (validation: required)
 }
 
+/**
+ * Response to a token validation request
+ */
 message ValidateTokenResponse {
-  bool valid = 1;
+  bool valid = 1; /// Is the token valid
 }
 
+/**
+ * Used to refresh a token
+ */
 message RefreshTokenRequest {
-  string refresh_token = 1;
+  string refresh_token = 1; /// Refresh token (validation: required)
 }
 
+/**
+ * Response to a token refresh request, return a new pair of tokens
+ */
 message RefreshTokenResponse {
-  Tokens tokens = 1;
+  Tokens tokens = 1; /// Generated tokens
 }
 
+/**
+ * Used to logout a user, invalidate the refresh token
+ */
 message LogoutRequest {
-  string refresh_token = 1;
+  string refresh_token = 1; /// Refresh token to invalidate (validation: required)
 }
 
 message LogoutResponse {}

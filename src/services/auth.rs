@@ -44,13 +44,13 @@ impl Auth for AuthService {
         rpcs::register(request.into_inner(), &mut conn).map(Response::new)
     }
 
-    async fn login(
+    async fn generate_otp(
         &self,
-        request: Request<LoginRequest>,
-    ) -> Result<Response<LoginResponse>, Status> {
+        request: Request<GenerateOtpRequest>,
+    ) -> Result<Response<GenerateOtpResponse>, Status> {
         let mut conn = get_connection(&self.pool)?;
         let mut r_conn = get_redis_connection(&self.r_client)?;
-        rpcs::login(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
+        rpcs::generate_otp(request.into_inner(), &mut conn, &mut r_conn).map(Response::new)
     }
 
     async fn generate_magic_link(&self, request: Request<GenerateMagicLinkRequest>) -> Result<Response<GenerateMagicLinkResponse>, Status> {

@@ -106,10 +106,13 @@ pub mod auth_client {
             req.extensions_mut().insert(GrpcMethod::new("auth.Auth", "Register"));
             self.inner.unary(req, path, codec).await
         }
-        pub async fn login(
+        pub async fn generate_otp(
             &mut self,
-            request: impl tonic::IntoRequest<super::LoginRequest>,
-        ) -> std::result::Result<tonic::Response<super::LoginResponse>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::GenerateOtpRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GenerateOtpResponse>,
+            tonic::Status,
+        > {
             self.inner
                 .ready()
                 .await
@@ -120,9 +123,9 @@ pub mod auth_client {
                     )
                 })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/auth.Auth/Login");
+            let path = http::uri::PathAndQuery::from_static("/auth.Auth/GenerateOTP");
             let mut req = request.into_request();
-            req.extensions_mut().insert(GrpcMethod::new("auth.Auth", "Login"));
+            req.extensions_mut().insert(GrpcMethod::new("auth.Auth", "GenerateOTP"));
             self.inner.unary(req, path, codec).await
         }
         pub async fn generate_magic_link(
@@ -276,10 +279,13 @@ pub mod auth_server {
             tonic::Response<super::RegisterResponse>,
             tonic::Status,
         >;
-        async fn login(
+        async fn generate_otp(
             &self,
-            request: tonic::Request<super::LoginRequest>,
-        ) -> std::result::Result<tonic::Response<super::LoginResponse>, tonic::Status>;
+            request: tonic::Request<super::GenerateOtpRequest>,
+        ) -> std::result::Result<
+            tonic::Response<super::GenerateOtpResponse>,
+            tonic::Status,
+        >;
         async fn generate_magic_link(
             &self,
             request: tonic::Request<super::GenerateMagicLinkRequest>,
@@ -443,23 +449,23 @@ pub mod auth_server {
                     };
                     Box::pin(fut)
                 }
-                "/auth.Auth/Login" => {
+                "/auth.Auth/GenerateOTP" => {
                     #[allow(non_camel_case_types)]
-                    struct LoginSvc<T: Auth>(pub Arc<T>);
-                    impl<T: Auth> tonic::server::UnaryService<super::LoginRequest>
-                    for LoginSvc<T> {
-                        type Response = super::LoginResponse;
+                    struct GenerateOTPSvc<T: Auth>(pub Arc<T>);
+                    impl<T: Auth> tonic::server::UnaryService<super::GenerateOtpRequest>
+                    for GenerateOTPSvc<T> {
+                        type Response = super::GenerateOtpResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::LoginRequest>,
+                            request: tonic::Request<super::GenerateOtpRequest>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as Auth>::login(&inner, request).await
+                                <T as Auth>::generate_otp(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -471,7 +477,7 @@ pub mod auth_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = LoginSvc(inner);
+                        let method = GenerateOTPSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
