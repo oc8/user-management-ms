@@ -1,0 +1,52 @@
+name: PR Tests
+
+on:
+  pull_request_target:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  pr-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6380:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test --all-features
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/auth_service
+          ACCESS_TOKEN_SECRET: secret
+          ACCESS_TOKEN_TTL: 60
+          REFRESH_TOKEN_SECRET: secret
+          REFRESH_TOKEN_TTL: 86400
+          JWT_ISSUER: auth_service
+          OTP_SECRET: EMZXDFRGOLH3JBQ4U2JQXSMXDDWD2I5J
+          OTP_TTL: 60

@@ -1,0 +1,53 @@
+name: Build Python Package
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest Git tag
+        id: get_version
+        run: echo "VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Edit setup.py with the latest version
+        run: sed -i "s/version='.*'/version='${{ env.VERSION }}'/" setup.py
+
+      - name: Edit Cargo.toml
+        run: |
+          VERSION=$(echo "${{ env.VERSION }}" | cut -c 2-)
+          sed -i "0,/version = \"[^\"]*\"/ s/version = \"[^\"]*\"/version = \"$VERSION\"/" Cargo.toml
+
+      - name: Commit & Push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          message: "chore: update python package & rust crate version to ${{ env.VERSION }}"
+          branch: "master"
+
+      - name: Build package
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools
+          python setup.py sdist
+
+      - name: Upload artifact
+        uses: AButler/upload-release-assets@v3.0
+        with:
+          files: dist/auth-*.tar.gz
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
