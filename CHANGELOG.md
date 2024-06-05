@@ -1,0 +1,21 @@
+# Changelog
+
+## [1.1.0](https://github.com/oc8/user-management-ms/compare/1.0.3...v1.1.0) (2024-06-05)
+
+
+### Features
+
+* add doc generator, renamed login method to generate_otp ([2bdbe6a](https://github.com/oc8/user-management-ms/commit/2bdbe6afec3d3f5c174eb33bbb6c44a82799ddaa))
+* add error logging ([21b22d9](https://github.com/oc8/user-management-ms/commit/21b22d9f930acd76b41ff3d3bdac6c7f5dcfda6a))
+* add GenerateMagicLink, ValidateMagicLink, ValidateOTP, ValidateToken, RefreshToken & Logout tests ([8f9937b](https://github.com/oc8/user-management-ms/commit/8f9937b074d35e940d4ba6fc4d46e57d6af58f0b))
+* add login tests, fixtures & mock_database function ([fea8a5e](https://github.com/oc8/user-management-ms/commit/fea8a5ed8ad76b04b231840d598db58bda67e4ef))
+* add Makefile ([d06c497](https://github.com/oc8/user-management-ms/commit/d06c4979f2c47b60a9a722e72f243807ce19f593))
+* add server reflection ([b647b5e](https://github.com/oc8/user-management-ms/commit/b647b5ed53b49747e4cb763e243fa5550db4c16f))
+* add testing flow ([f4cf55b](https://github.com/oc8/user-management-ms/commit/f4cf55bfbc32ac67ea7978dcbb24c480f5c326bb))
+
+
+### Bug Fixes
+
+* remove panic ([785fcf6](https://github.com/oc8/user-management-ms/commit/785fcf630a8053f055325e3a28d87330456407b5))
+* tests fix replaced login method by generate_otp ([d296ad4](https://github.com/oc8/user-management-ms/commit/d296ad47fd31bb11ba97ae832988712b30d36752))
+* validate email in validate_otp_request ([aec0d16](https://github.com/oc8/user-management-ms/commit/aec0d16070b6cef4fed70a66fa0ac1c923cf8a66))
