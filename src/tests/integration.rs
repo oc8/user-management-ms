@@ -2,7 +2,7 @@ use tokio::sync::oneshot;
 use tonic::transport::Server;
 use protos::auth::auth_client::AuthClient;
 use protos::auth::auth_server::AuthServer;
-use protos::auth::{GenerateMagicLinkRequest, LoginRequest, LogoutRequest, RefreshTokenRequest, RegisterRequest, ValidateMagicLinkRequest, ValidateOtpRequest, ValidateTokenRequest};
+use protos::auth::{GenerateMagicLinkRequest, GenerateOtpRequest, LogoutRequest, RefreshTokenRequest, RegisterRequest, ValidateMagicLinkRequest, ValidateOtpRequest, ValidateTokenRequest};
 use crate::tests::{TestContext};
 use futures_util::FutureExt;
 use validator::ValidateLength;
@@ -143,11 +143,11 @@ async fn login() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut client = AuthClient::connect(ctx.url.clone()).await.unwrap();
 
-    let request = tonic::Request::new(LoginRequest {
+    let request = tonic::Request::new(GenerateOtpRequest {
         email: fixtures[0].email.clone(),
     });
 
-    let response = client.login(request).await?;
+    let response = client.generate_otp(request).await?;
     let response = response.into_inner();
 
     assert_eq!(response.code.length().unwrap(), 6);
@@ -177,11 +177,11 @@ async fn login_not_exist() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut client = AuthClient::connect(ctx.url.clone()).await.unwrap();
 
-    let request = tonic::Request::new(LoginRequest {
+    let request = tonic::Request::new(GenerateOtpRequest {
         email: "none@none.fr".to_string(),
     });
 
-    match client.login(request).await {
+    match client.generate_otp(request).await {
         Ok(_) => panic!("Expected error"),
         Err(e) => {
             assert_eq!(e.code(), tonic::Code::NotFound);
@@ -213,11 +213,11 @@ async fn login_bad_argument() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut client = AuthClient::connect(ctx.url.clone()).await.unwrap();
 
-    let request = tonic::Request::new(LoginRequest {
+    let request = tonic::Request::new(GenerateOtpRequest {
         email: "bad_email".to_string(),
     });
 
-    match client.login(request).await {
+    match client.generate_otp(request).await {
         Ok(_) => panic!("Expected error"),
         Err(e) => {
             assert_eq!(e.code(), tonic::Code::InvalidArgument);
@@ -548,11 +548,11 @@ async fn validate_otp() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut client = AuthClient::connect(ctx.url.clone()).await.unwrap();
 
-    let request = tonic::Request::new(LoginRequest {
+    let request = tonic::Request::new(GenerateOtpRequest {
         email: fixtures[0].email.clone(),
     });
 
-    let response = client.login(request).await?;
+    let response = client.generate_otp(request).await?;
     let response = response.into_inner();
 
     let request = tonic::Request::new(ValidateOtpRequest {
@@ -768,11 +768,11 @@ async fn validate_token_with_otp() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut client = AuthClient::connect(ctx.url.clone()).await.unwrap();
 
-    let request = tonic::Request::new(LoginRequest {
+    let request = tonic::Request::new(GenerateOtpRequest {
         email: fixtures[0].email.clone(),
     });
 
-    let response = client.login(request).await?;
+    let response = client.generate_otp(request).await?;
     let response = response.into_inner();
 
     let request = tonic::Request::new(ValidateOtpRequest {
