@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.1](https://github.com/oc8/user-management-ms/compare/v1.1.0...v1.1.1) (2024-06-05)
+
+
+### Bug Fixes
+
+* remove build files ([0374828](https://github.com/oc8/user-management-ms/commit/03748280b91619fd8ce92f2c700baebcad14a79e))
+
+
+### Miscellaneous Chores
+
+* release 1.1.1 ([3514a16](https://github.com/oc8/user-management-ms/commit/3514a16f503844598720ae9d43c0a7d4b831a0fa))
+
 ## [1.1.0](https://github.com/oc8/user-management-ms/compare/1.0.3...v1.1.0) (2024-06-05)
 
 
