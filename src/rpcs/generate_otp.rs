@@ -3,19 +3,19 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use redis::Commands;
 use tonic::{Status};
 use totp_rs::{Algorithm, Secret, TOTP};
-use protos::auth::{LoginRequest, LoginResponse};
+use protos::auth::{GenerateOtpRequest, GenerateOtpResponse};
 use user_management::report_error;
 use crate::models::user::User;
-use crate::validations::validate_login_request;
+use crate::validations::validate_generate_otp_request;
 use crate::database::PgPooledConnection;
 use crate::errors;
 
-pub fn login(
-    request: LoginRequest,
+pub fn generate_otp(
+    request: GenerateOtpRequest,
     conn: &mut PgPooledConnection,
     r_conn: &mut redis::Connection,
-) -> Result<LoginResponse, Status> {
-    validate_login_request(&request)?;
+) -> Result<GenerateOtpResponse, Status> {
+    validate_generate_otp_request(&request)?;
 
     let user = User::find_by_email(conn, &request.email)
         .ok_or_else(|| Status::not_found(errors::USER_NOT_FOUND))?;
@@ -39,7 +39,7 @@ pub fn login(
         Status::internal(errors::INTERNAL)
     })?;
 
-    Ok(LoginResponse {
+    Ok(GenerateOtpResponse {
         code,
     })
 }

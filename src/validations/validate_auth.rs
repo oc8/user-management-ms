@@ -1,5 +1,5 @@
 use tonic::{Code, Status};
-use protos::auth::{GenerateMagicLinkRequest, LoginRequest, LogoutRequest, RefreshTokenRequest, RegisterRequest, ValidateMagicLinkRequest, ValidateOtpRequest, ValidateTokenRequest};
+use protos::auth::{GenerateMagicLinkRequest, GenerateOtpRequest, LogoutRequest, RefreshTokenRequest, RegisterRequest, ValidateMagicLinkRequest, ValidateOtpRequest, ValidateTokenRequest};
 use validator::{ValidateEmail};
 use crate::errors;
 
@@ -13,7 +13,7 @@ pub fn validate_register_request(req: &RegisterRequest) -> Result<(), Status> {
     }
 }
 
-pub fn validate_login_request(req: &LoginRequest) -> Result<(), Status> {
+pub fn validate_generate_otp_request(req: &GenerateOtpRequest) -> Result<(), Status> {
     if req.email.validate_email() {
         Ok(())
     } else {

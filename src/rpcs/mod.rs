@@ -1,5 +1,5 @@
-mod login;
-pub use login::login;
+mod generate_otp;
+pub use generate_otp::generate_otp;
 mod register;
 pub use register::register;
 mod validate_otp;

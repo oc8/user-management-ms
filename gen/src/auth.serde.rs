@@ -181,7 +181,7 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkResponse {
         deserializer.deserialize_struct("auth.GenerateMagicLinkResponse", FIELDS, GeneratedVisitor)
     }
 }
-impl serde::Serialize for LoginRequest {
+impl serde::Serialize for GenerateOtpRequest {
     #[allow(deprecated)]
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
@@ -192,14 +192,14 @@ impl serde::Serialize for LoginRequest {
         if !self.email.is_empty() {
             len += 1;
         }
-        let mut struct_ser = serializer.serialize_struct("auth.LoginRequest", len)?;
+        let mut struct_ser = serializer.serialize_struct("auth.GenerateOTPRequest", len)?;
         if !self.email.is_empty() {
             struct_ser.serialize_field("email", &self.email)?;
         }
         struct_ser.end()
     }
 }
-impl<'de> serde::Deserialize<'de> for LoginRequest {
+impl<'de> serde::Deserialize<'de> for GenerateOtpRequest {
     #[allow(deprecated)]
     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
     where
@@ -243,13 +243,13 @@ impl<'de> serde::Deserialize<'de> for LoginRequest {
         }
         struct GeneratedVisitor;
         impl<'de> serde::de::Visitor<'de> for GeneratedVisitor {
-            type Value = LoginRequest;
+            type Value = GenerateOtpRequest;
 
             fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                formatter.write_str("struct auth.LoginRequest")
+                formatter.write_str("struct auth.GenerateOTPRequest")
             }
 
-            fn visit_map<V>(self, mut map_: V) -> std::result::Result<LoginRequest, V::Error>
+            fn visit_map<V>(self, mut map_: V) -> std::result::Result<GenerateOtpRequest, V::Error>
                 where
                     V: serde::de::MapAccess<'de>,
             {
@@ -264,15 +264,15 @@ impl<'de> serde::Deserialize<'de> for LoginRequest {
                         }
                     }
                 }
-                Ok(LoginRequest {
+                Ok(GenerateOtpRequest {
                     email: email__.unwrap_or_default(),
                 })
             }
         }
-        deserializer.deserialize_struct("auth.LoginRequest", FIELDS, GeneratedVisitor)
+        deserializer.deserialize_struct("auth.GenerateOTPRequest", FIELDS, GeneratedVisitor)
     }
 }
-impl serde::Serialize for LoginResponse {
+impl serde::Serialize for GenerateOtpResponse {
     #[allow(deprecated)]
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
@@ -283,14 +283,14 @@ impl serde::Serialize for LoginResponse {
         if !self.code.is_empty() {
             len += 1;
         }
-        let mut struct_ser = serializer.serialize_struct("auth.LoginResponse", len)?;
+        let mut struct_ser = serializer.serialize_struct("auth.GenerateOTPResponse", len)?;
         if !self.code.is_empty() {
             struct_ser.serialize_field("code", &self.code)?;
         }
         struct_ser.end()
     }
 }
-impl<'de> serde::Deserialize<'de> for LoginResponse {
+impl<'de> serde::Deserialize<'de> for GenerateOtpResponse {
     #[allow(deprecated)]
     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
     where
@@ -334,13 +334,13 @@ impl<'de> serde::Deserialize<'de> for LoginResponse {
         }
         struct GeneratedVisitor;
         impl<'de> serde::de::Visitor<'de> for GeneratedVisitor {
-            type Value = LoginResponse;
+            type Value = GenerateOtpResponse;
 
             fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                formatter.write_str("struct auth.LoginResponse")
+                formatter.write_str("struct auth.GenerateOTPResponse")
             }
 
-            fn visit_map<V>(self, mut map_: V) -> std::result::Result<LoginResponse, V::Error>
+            fn visit_map<V>(self, mut map_: V) -> std::result::Result<GenerateOtpResponse, V::Error>
                 where
                     V: serde::de::MapAccess<'de>,
             {
@@ -355,12 +355,12 @@ impl<'de> serde::Deserialize<'de> for LoginResponse {
                         }
                     }
                 }
-                Ok(LoginResponse {
+                Ok(GenerateOtpResponse {
                     code: code__.unwrap_or_default(),
                 })
             }
         }
-        deserializer.deserialize_struct("auth.LoginResponse", FIELDS, GeneratedVisitor)
+        deserializer.deserialize_struct("auth.GenerateOTPResponse", FIELDS, GeneratedVisitor)
     }
 }
 impl serde::Serialize for LogoutRequest {

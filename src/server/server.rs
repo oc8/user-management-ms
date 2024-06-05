@@ -41,7 +41,13 @@ pub fn start_server(
         }
     };
 
+    let reflect = tonic_reflection::server::Builder::configure()
+        .register_encoded_file_descriptor_set(protos::auth::FILE_DESCRIPTOR_SET)
+        .build()
+        .unwrap();
+
     let tonic_router = tonic_server
+        .add_service(reflect)
         .add_service(AuthServer::new(auth));
 
     let server = tokio::spawn(async move {
