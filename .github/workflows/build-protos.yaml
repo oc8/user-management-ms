@@ -1,0 +1,44 @@
+name: Build Protos
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build-protos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.12.2'
+
+      - name: Setup rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Install protoc-gen-prost-crate
+        run: cargo install protoc-gen-prost-crate
+
+      - name: Install buf cli
+        run: npm install @bufbuild/buf
+
+      - name: Generate protos
+        run: npx buf generate
+
+      - name: Commit & Push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.PAT }}
+          message: "chore: build protos"
+          branch: "master"
+          force: true
