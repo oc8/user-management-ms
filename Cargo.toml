@@ -1,11 +1,15 @@
 [package]
-name = "user-management"
+name = "user-service"
 version = "1.1.1"
 edition = "2021"
 
+[[bin]]
+name = "user-service"
+path = "src/main.rs"
+
 [dependencies]
 tonic = { version = "0.10.2", features = ["tls"] }
-tokio = { version = "1.37.0", features = ["rt", "rt-multi-thread", "macros"] }
+tokio = { version = "1.37.0", features = ["full"] }
 prost = "0.12.4"
 protos = { path = "./gen" }
 diesel = { version = "2.1.6", features = ["postgres_backend", "postgres", "uuid", "r2d2"] }
@@ -30,6 +34,10 @@ diesel_migrations = "2.1.0"
 futures-util = "0.3.30"
 yaml-rust = "0.4.5"
 tonic-reflection = "0.10.2"
+sqlx = { version = "0.7.4", features = ["postgres", "runtime-tokio-native-tls", "uuid"] }
+deadpool-redis = "0.15.1"
+thiserror = "1.0.59"
+async-trait = "0.1.80"
 
 [build-dependencies]
 tonic-build = "0.11.0"

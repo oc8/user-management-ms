@@ -1,13 +1,82 @@
-pub const INTERNAL: &str = "internal";
-pub const REDIS_CONNECTION_FAILURE: &str = "redis_connection_failure";
-pub const DATABASE_CONNECTION_FAILURE: &str = "database_connection_failure";
-pub const EMAIL_ALREADY_EXISTS: &str = "email_already_exists";
-pub const INVALID_EMAIL_FORMAT: &str = "invalid_email_format";
-pub const INVALID_OTP: &str = "invalid_otp";
-pub const INVALID_OTP_FORMAT: &str = "invalid_otp_format";
-pub const INVALID_TOKEN: &str = "invalid_token";
-pub const INVALID_TOKEN_FORMAT: &str = "invalid_token_format";
-pub const INVALID_REFRESH_TOKEN: &str = "invalid_refresh_token";
-pub const INVALID_MAGIC_CODE_FORMAT: &str = "invalid_magic_code_format";
-pub const INVALID_MAGIC_CODE: &str = "invalid_magic_code";
-pub const USER_NOT_FOUND: &str = "user_not_found";
+use thiserror::Error;
+use totp_rs::TotpUrlError;
+use crate::report_error;
+
+#[derive(Error, Debug)]
+#[non_exhaustive]
+pub enum ApiError {
+    #[error("internal server error")]
+    InternalServerError,
+    #[error("the request was invalid {0}")]
+    InvalidRequest(String),
+    #[error("redis connection failure")]
+    RedisConnectionFailure,
+    #[error("cache error")]
+    CacheError(#[from] redis::RedisError),
+    #[error("database connection failure")]
+    DatabaseConnectionFailure,
+    #[error("database error")]
+    DatabaseError(#[from] sqlx::Error),
+    #[error("a user with the email {0} already exists")]
+    UserAlreadyExists(String),
+    #[error("invalid email format")]
+    InvalidEmailFormat,
+    #[error("invalid OTP")]
+    InvalidOTP,
+    #[error("invalid OTP format")]
+    InvalidOTPFormat,
+    #[error("invalid token")]
+    InvalidToken,
+    #[error("invalid token format")]
+    InvalidTokenFormat,
+    #[error("invalid refresh token")]
+    InvalidRefreshToken,
+    #[error("invalid magic code format")]
+    InvalidMagicCodeFormat,
+    #[error("invalid magic code")]
+    InvalidMagicCode,
+    #[error("user not found")]
+    UserNotFound,
+    #[error("invalid auth type")]
+    InvalidAuthType,
+    #[error("totp error")]
+    TOTPError(#[from] TotpUrlError),
+    #[error("jwt error")]
+    JWTError(#[from] jsonwebtoken::errors::Error),
+    #[error("env error")]
+    EnvError(#[from] std::env::VarError),
+    #[error("parse error")]
+    ParseError(#[from] std::num::ParseIntError),
+    #[error("{0}")]
+    Unknown(#[source] Box<dyn std::error::Error + Sync + Send>),
+}
+
+impl From<ApiError> for tonic::Status {
+    fn from(api_error: ApiError) -> tonic::Status {
+        report_error(&api_error);
+        match api_error {
+            ApiError::InvalidRequest(_) => {
+                tonic::Status::invalid_argument(format!("{:?}", api_error))
+            }
+            ApiError::RedisConnectionFailure => tonic::Status::internal(format!("{:?}", api_error)),
+            ApiError::DatabaseConnectionFailure => tonic::Status::internal(format!("{:?}", api_error)),
+            ApiError::DatabaseError(_) => tonic::Status::internal(format!("{:?}", api_error)),
+            ApiError::UserAlreadyExists(_) => tonic::Status::already_exists(format!("{:?}", api_error)),
+            ApiError::InvalidEmailFormat => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::InvalidOTP => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::InvalidOTPFormat => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::InvalidToken => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::InvalidTokenFormat => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::InvalidRefreshToken => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::InvalidMagicCodeFormat => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::InvalidMagicCode => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::UserNotFound => tonic::Status::not_found(format!("{:?}", api_error)),
+            ApiError::InvalidAuthType => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::TOTPError(_) => tonic::Status::invalid_argument(format!("{:?}", api_error)),
+            ApiError::JWTError(_) => tonic::Status::internal(format!("{:?}", api_error)),
+            ApiError::EnvError(_) => tonic::Status::internal(format!("{:?}", api_error)),
+            ApiError::ParseError(_) => tonic::Status::internal(format!("{:?}", api_error)),
+            _ => tonic::Status::internal(format!("{:?}", api_error)),
+        }
+    }
+}

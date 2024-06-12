@@ -1,58 +1,112 @@
-use diesel::{
-    ExpressionMethods, Insertable, PgConnection, QueryDsl, Queryable, RunQueryDsl, Selectable,
-    SelectableHelper,
-};
+use std::convert::TryFrom;
 use uuid::Uuid;
+use crate::errors::{ApiError};
 
-use crate::schema::users;
+use async_trait::async_trait;
+use crate::generate_secret;
 
-#[derive(Queryable, Selectable)]
-#[diesel(table_name = users)]
-#[diesel(check_for_backend(diesel::pg::Pg))]
+/// Defines the full user details structure.
+///
+/// This should never be returned in an API response, as it contains the users secret.
+#[derive(Debug, PartialEq)]
 pub struct User {
     pub id: Uuid,
     pub email: String,
     pub otp_secret: String,
 }
 
-#[derive(Insertable, Debug)]
-#[diesel(table_name = users)]
-pub struct NewUser<'a> {
-    pub email: &'a str,
-    pub otp_secret: &'a str,
+/// Defines a user structure that can be inserted into the database.
+#[derive(Debug, PartialEq)]
+pub struct UserInsert {
+    pub email: String,
+    pub otp_secret: String,
 }
 
-impl User {
-    pub fn create(
-        conn: &mut PgConnection,
-        user: NewUser,
-    ) -> Result<User, diesel::result::Error> {
-        match diesel::insert_into(users::table)
-            .values(user)
-            .returning(User::as_returning())
-            .get_result(conn)
-        {
-            Ok(user) => Ok(user),
-            Err(e) => {
-                log::error!("Failed to create user: {}", e);
-                Err(e)
-            },
-        }
-    }
+/// Defines the data required to create a new user.
+#[derive(Debug, PartialEq)]
+pub struct UserRegister {
+    pub email: String,
+}
 
-    pub fn find_by_email(conn: &mut PgConnection, email: &str) -> Option<User> {
-        users::dsl::users
-            .select(User::as_select())
-            .filter(users::dsl::email.eq(email))
-            .first(conn)
-            .ok()
-    }
+impl TryFrom<&UserRegister> for UserInsert {
+    type Error = ApiError;
 
-    pub fn find_by_id(conn: &mut PgConnection, id: Uuid) -> Option<User> {
-        users::dsl::users
-            .select(User::as_select())
-            .filter(users::dsl::id.eq(id))
-            .first(conn)
-            .ok()
+    fn try_from(account_register: &UserRegister) -> Result<Self, Self::Error> {
+        let UserRegister {
+            email,
+            ..
+        } = account_register;
+
+        Ok(Self {
+            email: email.to_string(),
+            otp_secret: generate_secret(),
+        })
     }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum AuthType {
+    MagicLink,
+    OTP,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct UserAuthenticate {
+    pub email: String,
+    pub auth_type: AuthType,
+}
+
+#[async_trait]
+pub trait UserRepository: Send + Sync + 'static {
+    /// Attempts to create a new user.
+    ///
+    /// # Parameters
+    /// A struct containing the user details to be registered.
+    ///
+    /// # Return Values
+    ///
+    /// ## Success
+    /// A struct containing the newly created users account details.
+    ///
+    /// ## Errors
+    /// An error could occur if the user has already been registered, or a failure occurred with the
+    /// database.
+    async fn create_user(
+        &mut self,
+        account_register: &UserRegister,
+    ) -> Result<User, ApiError>;
+
+    /// Attempts to find a user by their email address.
+    ///
+    /// # Parameters
+    /// The email address of the user to be found.
+    ///
+    /// # Return Values
+    ///
+    /// ## Success
+    /// A struct containing the users account details.
+    ///
+    /// ## Errors
+    /// If the attempted authentication details were incorrect, or a failure occurred with the
+    /// database.
+    async fn find_user_by_email(
+        &mut self,
+        email: &str,
+    ) -> Result<User, ApiError>;
+
+    /// Attempts to find a user by their id.
+    ///
+    /// # Parameters
+    /// The id of the user to be found.
+    ///
+    /// ## Success
+    /// A struct containing the users account details.
+    ///
+    /// ## Errors
+    /// If the attempted authentication details were incorrect, or a failure occurred with the
+    /// database.
+    async fn find_user_by_id(
+        &mut self,
+        id: Uuid,
+    ) -> Result<User, ApiError>;
 }
