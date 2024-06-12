@@ -3,6 +3,16 @@ use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
 use rand::Rng;
 use redis::{Commands, RedisResult};
 
+pub mod schema;
+pub mod models;
+pub mod validations;
+pub mod server;
+pub mod database;
+pub mod handlers;
+pub mod errors;
+pub mod repositories;
+pub mod services;
+
 pub fn init_service_logging() {
     env_logger::builder()
         .target(env_logger::Target::Stdout)
@@ -11,14 +21,9 @@ pub fn init_service_logging() {
         .init();
 }
 
-pub fn env_var(name: &str) -> Option<String> {
-    env::var(name).ok().filter(|s| !s.is_empty())
-}
-
-pub fn report_error<E: 'static>(err: E)
+pub fn report_error<E>(err: &E)
     where
-        E: std::error::Error,
-        E: Send + Sync,
+        E: std::error::Error + Send + Sync,
 {
     let mut stack = String::from("\n");
     if let Some(cause) = err.source() {
@@ -28,7 +33,6 @@ pub fn report_error<E: 'static>(err: E)
     }
     log::error!("[ERROR] {}\nCaused by: {}", err, stack);
 }
-
 pub fn create_socket_addr(port: u16) -> SocketAddr {
     let is_ipv6 = env::var("ENABLE_IPV6").unwrap_or_default().parse::<bool>().unwrap_or(false);
 

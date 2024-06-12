@@ -1,12 +1,13 @@
-use std::sync::Arc;
+use std::env;
+use std::sync::{Arc};
 
 use ::log::{info, warn};
 use tokio::task::JoinHandle;
 use tonic::transport::{Certificate, Identity, Server, ServerTlsConfig};
 use protos::auth::auth_server::AuthServer;
-use user_management::{create_socket_addr, env_var, report_error};
-use crate::database::PgPool;
-use crate::services::auth::AuthService;
+use crate::database::pg_database::PgPool;
+use crate::{create_socket_addr, report_error};
+use crate::services::auth_service::AuthService;
 
 pub struct TonicServer {
     pub handle: JoinHandle<()>,
@@ -15,10 +16,10 @@ pub struct TonicServer {
 
 pub fn start_server(
     pool: Arc<PgPool>,
-    r_client: redis::Client,
+    cache: Arc<redis::Client>,
     port: u16,
 ) -> Result<TonicServer, Box<dyn std::error::Error>> {
-    let auth = AuthService { pool,  r_client };
+    let auth = AuthService { pool,  cache };
 
     let (mut tonic_server, secure_mode) = match get_tls_config() {
         Some(tls) => {
@@ -30,7 +31,7 @@ pub fn start_server(
                 }
                 Err(details) => {
                     info!("Error configuring TLS. Connections are not secure.");
-                    report_error(details);
+                    report_error(&details);
                     (Server::builder(), false)
                 }
             }
@@ -56,8 +57,8 @@ pub fn start_server(
         match tonic_router.serve(tonic_addr).await {
             Ok(_) => info!("Server finished on {}", tonic_addr),
             Err(e) => {
-                ::log::warn!("Unable to start server on port {}", port);
-                report_error(e);
+                warn!("Unable to start server on port {}", port);
+                report_error(&e);
             }
         };
         ()
@@ -70,9 +71,9 @@ pub fn start_server(
 }
 
 fn get_tls_config() -> Option<ServerTlsConfig> {
-    let cert = env_var("TLS_CERT");
-    let key = env_var("TLS_KEY");
-    let ca_cert = env_var("CA_CERT");
+    let cert = env::var("TLS_CERT").ok();
+    let key = env::var("TLS_KEY").ok();
+    let ca_cert = env::var("CA_CERT").ok();
 
     match (cert, key, ca_cert) {
         (Some(cert), Some(key), Some(ca_cert)) => {
