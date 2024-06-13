@@ -64,7 +64,7 @@ pub fn generate_secret() -> String {
     let mut secret_key = vec![0u8; 20];
     rand::thread_rng().fill(&mut secret_key[..]);
 
-    let base32_secret = base32::encode(base32::Alphabet::RFC4648 { padding: false }, &secret_key);
+    let base32_secret = base32::encode(base32::Alphabet::Rfc4648 { padding: false }, &secret_key);
 
     base32_secret
 }

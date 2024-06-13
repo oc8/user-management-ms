@@ -2,18 +2,29 @@ use std::env;
 use std::time::{SystemTime, UNIX_EPOCH};
 use redis::Commands;
 use totp_rs::{Algorithm, Secret, TOTP};
+use validator::ValidateEmail;
 use protos::auth::{GenerateOtpRequest, GenerateOtpResponse};
 use crate::database::pg_database::PgPooledConnection;
 use crate::models::user::{UserRepository};
-use crate::validations::validate_generate_otp_request;
-use crate::errors::ApiError;
+use crate::validations::{ValidateRequest};
+use crate::errors::{ApiError, List, ValidationErrorKind};
+
+impl ValidateRequest for GenerateOtpRequest {
+    fn validate(&self) -> Result<(), ApiError> {
+        if self.email.validate_email() {
+            Ok(())
+        } else {
+            Err(ApiError::ValidationError(List::<ValidationErrorKind>(vec![ValidationErrorKind::InvalidEmailFormat("email".to_string())])))
+        }
+    }
+}
 
 pub async fn generate_otp(
     request: GenerateOtpRequest,
     conn: &mut PgPooledConnection,
     r_conn: &mut redis::Connection,
 ) -> Result<GenerateOtpResponse, ApiError> {
-    validate_generate_otp_request(&request)?;
+    request.validate()?;
 
     let user = conn.find_user_by_email(&request.email).await?;
 
