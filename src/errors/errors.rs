@@ -1,8 +1,49 @@
+use std::env::VarError;
+use std::fmt;
+use std::num::ParseIntError;
+use jsonwebtoken::errors::{ErrorKind};
+use redis::RedisError;
+use serde::{Deserialize, Serialize};
+use serde_variant::to_variant_name;
 use thiserror::Error;
 use totp_rs::TotpUrlError;
+use tonic_error::TonicError;
 use crate::report_error;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Serialize, Deserialize)]
+pub enum ValidationErrorKind {
+    #[error("invalid email format, field: {0}")]
+    InvalidEmailFormat(String),
+    #[error("invalid otp format, field: {0}")]
+    InvalidOTPFormat(String),
+    #[error("invalid token format, field: {0}")]
+    InvalidTokenFormat(String),
+    #[error("invalid refresh token format, field: {0}")]
+    InvalidRefreshTokenFormat(String),
+    #[error("invalid magic code format, field: {0}")]
+    InvalidMagicCodeFormat(String),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct List<T>(pub Vec<T>);
+
+impl<T> fmt::Display for List<T>
+where
+    T: fmt::Display + serde::Serialize,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut s = String::new();
+        for (i, item) in self.0.iter().enumerate() {
+            if i > 0 {
+                s.push_str(", ");
+            }
+            s.push_str(&item.to_string());
+        }
+        write!(f, "{}", s)
+    }
+}
+
+#[derive(Error, Debug, Serialize, Deserialize, TonicError)]
 #[non_exhaustive]
 pub enum ApiError {
     #[error("internal server error")]
@@ -12,71 +53,134 @@ pub enum ApiError {
     #[error("redis connection failure")]
     RedisConnectionFailure,
     #[error("cache error")]
-    CacheError(#[from] redis::RedisError),
+    CacheError,
     #[error("database connection failure")]
     DatabaseConnectionFailure,
-    #[error("database error")]
-    DatabaseError(#[from] sqlx::Error),
-    #[error("a user with the email {0} already exists")]
-    UserAlreadyExists(String),
-    #[error("invalid email format")]
-    InvalidEmailFormat,
-    #[error("invalid OTP")]
-    InvalidOTP,
-    #[error("invalid OTP format")]
-    InvalidOTPFormat,
+    #[error("database error {0}")]
+    DatabaseError(String),
+    #[error("already exists {0}")]
+    AlreadyExists(String),
+    #[error("not found {0}")]
+    NotFound(String),
     #[error("invalid token")]
     InvalidToken,
-    #[error("invalid token format")]
-    InvalidTokenFormat,
     #[error("invalid refresh token")]
     InvalidRefreshToken,
-    #[error("invalid magic code format")]
-    InvalidMagicCodeFormat,
     #[error("invalid magic code")]
     InvalidMagicCode,
+    #[error("invalid otp")]
+    InvalidOTP,
     #[error("user not found")]
     UserNotFound,
-    #[error("invalid auth type")]
-    InvalidAuthType,
-    #[error("totp error")]
-    TOTPError(#[from] TotpUrlError),
-    #[error("jwt error")]
-    JWTError(#[from] jsonwebtoken::errors::Error),
-    #[error("env error")]
-    EnvError(#[from] std::env::VarError),
-    #[error("parse error")]
-    ParseError(#[from] std::num::ParseIntError),
-    #[error("{0}")]
-    Unknown(#[source] Box<dyn std::error::Error + Sync + Send>),
+    #[error("validation error {0}")]
+    ValidationError(List<ValidationErrorKind>),
 }
 
-impl From<ApiError> for tonic::Status {
-    fn from(api_error: ApiError) -> tonic::Status {
-        report_error(&api_error);
-        match api_error {
-            ApiError::InvalidRequest(_) => {
-                tonic::Status::invalid_argument(format!("{:?}", api_error))
-            }
-            ApiError::RedisConnectionFailure => tonic::Status::internal(format!("{:?}", api_error)),
-            ApiError::DatabaseConnectionFailure => tonic::Status::internal(format!("{:?}", api_error)),
-            ApiError::DatabaseError(_) => tonic::Status::internal(format!("{:?}", api_error)),
-            ApiError::UserAlreadyExists(_) => tonic::Status::already_exists(format!("{:?}", api_error)),
-            ApiError::InvalidEmailFormat => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::InvalidOTP => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::InvalidOTPFormat => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::InvalidToken => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::InvalidTokenFormat => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::InvalidRefreshToken => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::InvalidMagicCodeFormat => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::InvalidMagicCode => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::UserNotFound => tonic::Status::not_found(format!("{:?}", api_error)),
-            ApiError::InvalidAuthType => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::TOTPError(_) => tonic::Status::invalid_argument(format!("{:?}", api_error)),
-            ApiError::JWTError(_) => tonic::Status::internal(format!("{:?}", api_error)),
-            ApiError::EnvError(_) => tonic::Status::internal(format!("{:?}", api_error)),
-            ApiError::ParseError(_) => tonic::Status::internal(format!("{:?}", api_error)),
-            _ => tonic::Status::internal(format!("{:?}", api_error)),
+impl ApiError {
+    pub fn code(&self) -> tonic::Code {
+        match self {
+            ApiError::InvalidRequest(_) => tonic::Code::InvalidArgument,
+            ApiError::RedisConnectionFailure => tonic::Code::Unavailable,
+            ApiError::CacheError => tonic::Code::Unavailable,
+            ApiError::DatabaseConnectionFailure => tonic::Code::Unavailable,
+            ApiError::DatabaseError(_) => tonic::Code::Internal,
+            ApiError::AlreadyExists(_) => tonic::Code::AlreadyExists,
+            ApiError::NotFound(_) => tonic::Code::NotFound,
+            ApiError::InvalidOTP => tonic::Code::InvalidArgument,
+            ApiError::InvalidToken => tonic::Code::InvalidArgument,
+            ApiError::InvalidRefreshToken => tonic::Code::InvalidArgument,
+            ApiError::InvalidMagicCode => tonic::Code::InvalidArgument,
+            ApiError::UserNotFound => tonic::Code::NotFound,
+            ApiError::ValidationError(_) => tonic::Code::InvalidArgument,
+            _ => tonic::Code::Internal,
         }
+    }
+
+    pub fn is_list(&self) -> bool {
+        match self {
+            ApiError::ValidationError(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn errors(&self) -> serde_json::Value {
+        match self {
+            ApiError::ValidationError(errors) => {
+                let mut v = Vec::new();
+                for e in &errors.0 {
+                    let type_name = to_variant_name(e).unwrap();
+                    let data = e.to_string();
+                    let (message, field) = data.split_once(", field: ").unwrap_or(("", ""));
+                    v.push(serde_json::json!({
+                        "message": message,
+                        "field": field,
+                        "type": type_name,
+                    }));
+                }
+
+                serde_json::json!(v)
+            }
+            _ => serde_json::json!([])
+        }
+    }
+}
+
+impl From<VarError> for ApiError {
+    fn from(error: VarError) -> Self {
+        report_error(&error);
+        ApiError::InternalServerError
+    }
+}
+
+impl From <jsonwebtoken::errors::Error> for ApiError {
+    fn from(error: jsonwebtoken::errors::Error) -> Self {
+        match error.kind() {
+            ErrorKind::InvalidToken => ApiError::InvalidToken,
+            _ => {
+                report_error(&error);
+                ApiError::InternalServerError
+            }
+        }
+    }
+}
+
+impl From <TotpUrlError> for ApiError {
+    fn from(error: TotpUrlError) -> Self {
+        report_error(&error);
+        ApiError::InternalServerError
+    }
+}
+
+impl From<ParseIntError> for ApiError {
+    fn from(error: ParseIntError) -> Self {
+        report_error(&error);
+        ApiError::InternalServerError
+    }
+}
+
+impl From<sqlx::Error> for ApiError {
+    fn from(error: sqlx::Error) -> Self {
+        match error {
+            sqlx::Error::RowNotFound => ApiError::UserNotFound,
+            sqlx::Error::Database(e) => {
+                if e.is_unique_violation() {
+                    ApiError::AlreadyExists(e.message().to_string())
+                } else {
+                    report_error(&e);
+                    ApiError::DatabaseError(e.message().to_string())
+                }
+            }
+            _ => {
+                report_error(&error);
+                ApiError::InternalServerError
+            }
+        }
+    }
+}
+
+impl From<RedisError> for ApiError {
+    fn from(error: RedisError) -> Self {
+        report_error(&error);
+        ApiError::InternalServerError
     }
 }

@@ -3,18 +3,29 @@ use jsonwebtoken::{decode, DecodingKey, Validation};
 use uuid::Uuid;
 use protos::auth::{RefreshTokenRequest, RefreshTokenResponse};
 use crate::database::pg_database::PgPooledConnection;
-use crate::errors::{ApiError};
+use crate::errors::{ApiError, List, ValidationErrorKind};
 use crate::{is_token_valid, store_token};
+use crate::errors::ApiError::ValidationError;
 use crate::models::user::{UserRepository};
 use crate::services::auth_service::{Claims, generate_tokens};
-use crate::validations::{validate_refresh_token_request};
+use crate::validations::{ValidateRequest};
+
+impl ValidateRequest for RefreshTokenRequest {
+    fn validate(&self) -> Result<(), ApiError> {
+        if self.refresh_token.len() > 0 {
+            Ok(())
+        } else {
+            Err(ValidationError(List::<ValidationErrorKind>(vec![ValidationErrorKind::InvalidTokenFormat("refresh_token".to_string())])))
+        }
+    }
+}
 
 pub async fn refresh_token(
     request: RefreshTokenRequest,
     conn: &mut PgPooledConnection,
     r_conn: &mut redis::Connection,
 ) -> Result<RefreshTokenResponse, ApiError> {
-    validate_refresh_token_request(&request)?;
+    request.validate()?;
 
     if !is_token_valid(r_conn, &request.refresh_token)? {
         return Err(ApiError::InvalidToken);
