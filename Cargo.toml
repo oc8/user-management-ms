@@ -13,7 +13,6 @@ tokio = { version = "1.37.0", features = ["full"] }
 prost = "0.12.4"
 protos = { path = "./libs/gen" }
 tonic-error = { path = "libs/tonic-error" }
-diesel = { version = "2.1.6", features = ["postgres_backend", "postgres", "uuid", "r2d2"] }
 dotenvy = "0.15.7"
 uuid = "1.8.0"
 jsonwebtoken = "9"
@@ -32,7 +31,6 @@ axum = { version = "0.7.5", features = ["tokio", "http1"]}
 tower = "0.4.13"
 tokio-stream = "0.1.15"
 pbjson = "0.6.0"
-diesel_migrations = "2.1.0"
 futures-util = "0.3.30"
 yaml-rust = "0.4.5"
 tonic-reflection = "0.11.0"
