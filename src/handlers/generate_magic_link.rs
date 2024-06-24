@@ -29,9 +29,9 @@ pub async fn generate_magic_link(
     let email = request.email;
 
     match conn.find_user_by_email(&email).await {
-        Err(ApiError::NotFound(email)) => {
+        Err(ApiError::UserNotFound) => {
             conn.create_user(&UserRegister {
-                email,
+                email: email.clone(),
             }).await?;
         }
         Err(e) => {
