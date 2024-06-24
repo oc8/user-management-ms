@@ -3,7 +3,6 @@ use std::net::{Ipv6Addr, SocketAddr, SocketAddrV6};
 use rand::Rng;
 use redis::{Commands, RedisResult};
 
-pub mod schema;
 pub mod models;
 pub mod validations;
 pub mod server;
