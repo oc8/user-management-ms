@@ -23,7 +23,6 @@ struct TestContext {
 }
 
 // TODO: Add mock redis server
-#[allow(dead_code)]
 impl TestContext {
     async fn new(db_url: &str, db_name: &str, r_url: &str, port: u16) -> Self {
         dotenvy::dotenv().ok();

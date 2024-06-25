@@ -1,7 +1,6 @@
 use yaml_rust::YamlLoader;
 use std::fs;
 
-#[allow(dead_code)]
 pub fn load_fixtures_from_yaml<T>(file_path: &str) -> Result<Vec<T>, Box<dyn std::error::Error>>
     where
         T: std::convert::From<yaml_rust::Yaml>,

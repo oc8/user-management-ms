@@ -40,6 +40,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - run: cargo install sqlx-cli --no-default-features --features postgres && make migration && make test
         env:
+          RUSTFLAGS: -A dead_code
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/auth_service
           REDIS_HOSTNAME: localhost:6379
           REDIS_TLS: false
