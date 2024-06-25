@@ -19,7 +19,7 @@ RUN cargo install sqlx-cli --no-default-features --features native-tls,postgres
 COPY --from=build /app/migrations ./migrations
 COPY --from=build /app/Makefile ./Makefile
 
-COPY --from=build /app/target/release/user-management .
+COPY --from=build /app/target/release/user-service .
 
 COPY --from=build /app/deployments/scripts/entrypoint.sh ./entrypoint.sh
 RUN chmod +x entrypoint.sh
