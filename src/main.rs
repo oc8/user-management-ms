@@ -17,9 +17,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Set up the database connection
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
-    database::check_for_migrations(&database_url.clone())
-        .await
-        .expect("An error occurred while running migrations");
+    // database::check_for_migrations(&database_url.clone())
+    //     .await
+    //     .expect("An error occurred while running migrations");
 
     let pool = database::connect(&database_url)
         .await

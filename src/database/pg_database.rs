@@ -1,8 +1,7 @@
 use std::env;
 use std::time::Duration;
 use sqlx::postgres::PgPoolOptions;
-use sqlx::{Connection, PgConnection, Pool, Postgres};
-use sqlx::migrate::MigrateDatabase;
+use sqlx::{Pool, Postgres};
 
 pub type PgPooledConnection = sqlx::pool::PoolConnection<Postgres>;
 pub type PgPool = Pool<Postgres>;
@@ -30,20 +29,20 @@ pub async fn connect(database_url: &str) -> Result<PgPool, sqlx::Error> {
     Ok(pool)
 }
 
-pub async fn check_for_migrations(database_url: &str) -> Result<(), sqlx::Error> {
-    if !Postgres::database_exists(database_url).await? {
-        log::info!("Database does not exist, creating it...");
-        Postgres::create_database(database_url).await?;
-    }
-
-    log::info!("Running migrations...");
-
-    let mut conn: PgConnection = PgConnection::connect(database_url).await?;
-
-    sqlx::migrate!()
-        .run(&mut conn)
-        .await
-        .expect("Failed to run migrations");
-
-    Ok(())
-}
+// pub async fn check_for_migrations(database_url: &str) -> Result<(), sqlx::Error> {
+//     if !Postgres::database_exists(database_url).await? {
+//         log::info!("Database does not exist, creating it...");
+//         Postgres::create_database(database_url).await?;
+//     }
+//
+//     log::info!("Running migrations...");
+//
+//     let mut conn: PgConnection = PgConnection::connect(database_url).await?;
+//
+//     sqlx::migrate!()
+//         .run(&mut conn)
+//         .await
+//         .expect("Failed to run migrations");
+//
+//     Ok(())
+// }
