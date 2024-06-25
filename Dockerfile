@@ -14,7 +14,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y libpq-dev libssl-dev pkg-config && rm -rf /var/lib/apt/lists/*
 
-RUN cargo install diesel_cli --version 2.1.1 --no-default-features --features postgres
+RUN cargo install sqlx-cli --no-default-features --features native-tls,postgres
 
 COPY --from=build /app/migrations ./migrations
 COPY --from=build /app/Makefile ./Makefile
