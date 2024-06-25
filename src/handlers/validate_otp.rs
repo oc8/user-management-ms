@@ -10,18 +10,18 @@ use crate::validations::{ValidateRequest};
 
 impl ValidateRequest for ValidateOtpRequest {
     fn validate(&self) -> Result<(), ApiError> {
-        let mut errors = List::<ValidationErrorKind>(vec![]);
+        let mut errors = vec![];
 
         if !self.email.validate_email() {
-            errors.0.push(ValidationErrorKind::InvalidEmailFormat("email".to_string()));
+            errors.push(ValidationErrorKind::InvalidEmailFormat("email".to_string()));
         }
 
         if self.otp.len() != 6 {
-            errors.0.push(ValidationErrorKind::InvalidOTPFormat("code".to_string()));
+            errors.push(ValidationErrorKind::InvalidOTPFormat("code".to_string()));
         }
 
-        if errors.0.len() > 0 {
-            return Err(ValidationError(errors));
+        if errors.len() > 0 {
+            return Err(ValidationError(List::<ValidationErrorKind>(errors)));
         }
 
         Ok(())
