@@ -9,7 +9,6 @@ use crate::database::pg_database::PgPool;
 use crate::{create_socket_addr, report_error};
 use crate::services::auth_service::AuthService;
 
-#[allow(dead_code)]
 pub struct TonicServer {
     pub handle: JoinHandle<()>,
     pub tls: bool,
