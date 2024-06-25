@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.2](https://github.com/oc8/user-management-ms/compare/v1.1.1...v1.1.2) (2024-06-25)
+
+
+### Bug Fixes
+
+* allow dead code ([4c8741d](https://github.com/oc8/user-management-ms/commit/4c8741d580a78c47bad1e011905afe1deb025ab8))
+* cargo allow dead code for pr-tests ([85b9a3a](https://github.com/oc8/user-management-ms/commit/85b9a3a9ab5bf08bcca33c205c2444d908c58388))
+* create user if not exist ([814f4dd](https://github.com/oc8/user-management-ms/commit/814f4dd6c51c16766f67118bbd76a22e8aceb643))
+* migrate dockerfile to sqlx, allow dead code & fix pr-tests workflow ([b0c3978](https://github.com/oc8/user-management-ms/commit/b0c3978bbcdee29fa78f7c97660b8941e3852b87))
+* pull_request_target =&gt; pull_request ([a72683c](https://github.com/oc8/user-management-ms/commit/a72683c53e1685f83d2a7e8dbd57fad527c3917e))
+
 ## [1.1.1](https://github.com/oc8/user-management-ms/compare/v1.1.0...v1.1.1) (2024-06-05)
 
 
