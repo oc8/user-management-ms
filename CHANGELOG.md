@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/oc8/user-management-ms/compare/v1.1.2...v1.2.0) (2024-08-08)
+
+
+### Features
+
+* add build proto script for imports ([e786f4c](https://github.com/oc8/user-management-ms/commit/e786f4ca3a039c02bc9928206ee923acb7e9a89d))
+* add openapi codegen ([df9bd1a](https://github.com/oc8/user-management-ms/commit/df9bd1a24c366f26884882c39ab7db76d823b619))
+* add sqlx queries cache ([fe8f137](https://github.com/oc8/user-management-ms/commit/fe8f13724492630a576d9144a3927e4b8afcf634))
+
+
+### Bug Fixes
+
+* remove sqlx auto migrate ([3926722](https://github.com/oc8/user-management-ms/commit/39267227c8cac21170bab5f48a9727527361b5bc))
+
 ## [1.1.2](https://github.com/oc8/user-management-ms/compare/v1.1.1...v1.1.2) (2024-06-25)
 
 
