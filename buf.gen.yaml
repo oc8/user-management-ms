@@ -9,6 +9,7 @@ plugins:
       - compile_well_known_types
       - extern_path=.google.protobuf=::pbjson_types
       - file_descriptor_set
+      - type_attribute=.=#[derive(JsonSchema\, ApiComponent)]
   - plugin: buf.build/community/neoeinstein-prost-serde:v0.3.0
     out: libs/gen/src
   - plugin: buf.build/community/neoeinstein-tonic:v0.4.0

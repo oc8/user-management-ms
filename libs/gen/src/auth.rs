@@ -1,6 +1,10 @@
+use apistos::ApiComponent;
+use schemars::JsonSchema;
+
 // @generated
 /// *
 /// Represent a user
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct User {
@@ -13,6 +17,7 @@ pub struct User {
 }
 /// *
 /// Represent a pair of tokens
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Tokens {
@@ -34,6 +39,7 @@ pub struct Tokens {
 }
 /// *
 /// Used to register a new user
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RegisterRequest {
@@ -41,12 +47,14 @@ pub struct RegisterRequest {
     #[prost(string, tag="1")]
     pub email: ::prost::alloc::string::String,
 }
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RegisterResponse {
 }
 /// *
 /// Used to generate an OTP code
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GenerateOtpRequest {
@@ -56,6 +64,7 @@ pub struct GenerateOtpRequest {
 }
 /// *
 /// Response to an OTP generation request
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GenerateOtpResponse {
@@ -65,6 +74,7 @@ pub struct GenerateOtpResponse {
 }
 /// *
 /// Used to generate a magic link
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GenerateMagicLinkRequest {
@@ -74,6 +84,7 @@ pub struct GenerateMagicLinkRequest {
 }
 /// *
 /// Response to a magic link generation request
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GenerateMagicLinkResponse {
@@ -83,6 +94,7 @@ pub struct GenerateMagicLinkResponse {
 }
 /// *
 /// Used to validate a magic link
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ValidateMagicLinkRequest {
@@ -95,6 +107,7 @@ pub struct ValidateMagicLinkRequest {
 }
 /// *
 /// Response to a magic link validation request
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ValidateMagicLinkResponse {
@@ -104,6 +117,7 @@ pub struct ValidateMagicLinkResponse {
 }
 /// *
 /// Used to validate an OTP
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ValidateOtpRequest {
@@ -116,6 +130,7 @@ pub struct ValidateOtpRequest {
 }
 /// *
 /// Response to an OTP validation request
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ValidateOtpResponse {
@@ -125,6 +140,7 @@ pub struct ValidateOtpResponse {
 }
 /// *
 /// Used to validate a token
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ValidateTokenRequest {
@@ -134,6 +150,7 @@ pub struct ValidateTokenRequest {
 }
 /// *
 /// Response to a token validation request
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ValidateTokenResponse {
@@ -143,6 +160,7 @@ pub struct ValidateTokenResponse {
 }
 /// *
 /// Used to refresh a token
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RefreshTokenRequest {
@@ -152,6 +170,7 @@ pub struct RefreshTokenRequest {
 }
 /// *
 /// Response to a token refresh request, return a new pair of tokens
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RefreshTokenResponse {
@@ -161,6 +180,7 @@ pub struct RefreshTokenResponse {
 }
 /// *
 /// Used to logout a user, invalidate the refresh token
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LogoutRequest {
@@ -168,6 +188,7 @@ pub struct LogoutRequest {
     #[prost(string, tag="1")]
     pub refresh_token: ::prost::alloc::string::String,
 }
+#[derive(JsonSchema, ApiComponent)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LogoutResponse {
