@@ -26,7 +26,7 @@ test:
 	cargo test -- --test-threads 1
 
 protos:
-	buf generate
+	buf generate && sh ./scripts/imports.sh
 
 migration:
 	sqlx migrate run

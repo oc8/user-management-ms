@@ -33,7 +33,7 @@ jobs:
         run: npm install @bufbuild/buf
 
       - name: Generate protos
-        run: npx buf generate
+        run: npx buf generate && sh ./scripts/imports.sh
 
       - name: Commit & Push changes
         uses: actions-js/push@master
