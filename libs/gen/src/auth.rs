@@ -1,3 +1,6 @@
+use apistos::ApiComponent;
+use schemars::JsonSchema;
+
 // @generated
 /// *
 /// Represent a user
