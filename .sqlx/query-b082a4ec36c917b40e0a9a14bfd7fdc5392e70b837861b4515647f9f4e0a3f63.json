@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            INSERT INTO users (email, otp_secret)\n            VALUES ($1, $2)\n            RETURNING *\n            ",
+  "query": "\n            SELECT * FROM \"user\"\n            WHERE email = $1\n            ",
   "describe": {
     "columns": [
       {
@@ -17,19 +17,24 @@
         "ordinal": 2,
         "name": "otp_secret",
         "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamp"
       }
     ],
     "parameters": {
       "Left": [
-        "Varchar",
-        "Varchar"
+        "Text"
       ]
     },
     "nullable": [
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "5ff67a7ed4112bf70abcf32bc1d2a607f69ad9e76330856eae951f796278101d"
+  "hash": "b082a4ec36c917b40e0a9a14bfd7fdc5392e70b837861b4515647f9f4e0a3f63"
 }
