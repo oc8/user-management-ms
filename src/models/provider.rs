@@ -1,49 +1,45 @@
 use std::convert::TryFrom;
 use uuid::Uuid;
+use num_derive::{FromPrimitive, ToPrimitive};
 use crate::errors::{ApiError};
 
 use async_trait::async_trait;
 use chrono::NaiveDateTime;
+use serde::Serialize;
 use crate::generate_secret;
 
-/// Defines the full user details structure.
+/// Defines the supported event status.
+#[derive(Debug, PartialEq, FromPrimitive, ToPrimitive, sqlx::Type, Copy, Clone, Serialize)]
+#[sqlx(type_name = "provider", rename_all = "lowercase")]
+pub enum ProviderType {
+    Local,
+    PasswordLess,
+}
+
+impl ProviderType {
+    pub fn to_string(&self) -> String {
+        match self {
+            ProviderType::Local => "local".to_string(),
+            ProviderType::PasswordLess => "passwordless".to_string(),
+        }
+    }
+}
+
+/// Defines the full provider details structure.
 ///
 /// This should never be returned in an API response, as it contains the users secret.
 #[derive(Debug, PartialEq)]
-pub struct User {
+pub struct Provider {
     pub id: Uuid,
-    pub email: String,
-    pub otp_secret: String,
+    pub provider: ProviderType,
     pub created_at: NaiveDateTime,
 }
 
 /// Defines a user structure that can be inserted into the database.
 #[derive(Debug, PartialEq)]
-pub struct UserInsert {
+pub struct ProviderInsert {
     pub email: String,
     pub otp_secret: String,
-}
-
-/// Defines the data required to create a new user.
-#[derive(Debug, PartialEq)]
-pub struct UserRegister {
-    pub email: String,
-}
-
-impl TryFrom<&UserRegister> for UserInsert {
-    type Error = ApiError;
-
-    fn try_from(account_register: &UserRegister) -> Result<Self, Self::Error> {
-        let UserRegister {
-            email,
-            ..
-        } = account_register;
-
-        Ok(Self {
-            email: email.to_string(),
-            otp_secret: generate_secret(),
-        })
-    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -73,10 +69,10 @@ pub trait UserRepository: Send + Sync + 'static {
     /// ## Errors
     /// An error could occur if the user has already been registered, or a failure occurred with the
     /// database.
-    async fn create_user(
+    async fn create_provider(
         &mut self,
-        account_register: &UserRegister,
-    ) -> Result<User, ApiError>;
+        provider: &ProviderInsert,
+    ) -> Result<Provider, ApiError>;
 
     /// Attempts to find a user by their email address.
     ///
@@ -91,10 +87,10 @@ pub trait UserRepository: Send + Sync + 'static {
     /// ## Errors
     /// If the attempted authentication details were incorrect, or a failure occurred with the
     /// database.
-    async fn find_user_by_email(
+    async fn find_provider_by_name(
         &mut self,
-        email: &str,
-    ) -> Result<User, ApiError>;
+        name: &str,
+    ) -> Result<Provider, ApiError>;
 
     /// Attempts to find a user by their id.
     ///
@@ -107,8 +103,8 @@ pub trait UserRepository: Send + Sync + 'static {
     /// ## Errors
     /// If the attempted authentication details were incorrect, or a failure occurred with the
     /// database.
-    async fn find_user_by_id(
+    async fn find_provider_by_id(
         &mut self,
         id: Uuid,
-    ) -> Result<User, ApiError>;
+    ) -> Result<Provider, ApiError>;
 }

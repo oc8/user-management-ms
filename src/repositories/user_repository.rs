@@ -16,7 +16,7 @@ impl UserRepository for PgConnection {
         let registered_user = sqlx::query_as!(
             User,
             r#"
-            INSERT INTO users (email, otp_secret)
+            INSERT INTO "user" (email, otp_secret)
             VALUES ($1, $2)
             RETURNING *
             "#,
@@ -33,7 +33,7 @@ impl UserRepository for PgConnection {
         let user = sqlx::query_as!(
             User,
             r#"
-            SELECT * FROM users
+            SELECT * FROM "user"
             WHERE email = $1
             "#,
             email
@@ -48,7 +48,7 @@ impl UserRepository for PgConnection {
         let user = sqlx::query_as!(
             User,
             r#"
-            SELECT * FROM users
+            SELECT * FROM "user"
             WHERE id = $1
             "#,
             id

@@ -1,3 +1,4 @@
+use base64::Engine;
 use redis::Commands;
 use validator::ValidateEmail;
 use protos::auth::{ValidateOtpRequest, ValidateOtpResponse};
@@ -7,6 +8,8 @@ use crate::errors::ApiError::ValidationError;
 use crate::models::user::{UserRepository};
 use crate::services::auth_service::generate_tokens;
 use crate::validations::{ValidateRequest};
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use sha2::Digest;
 
 impl ValidateRequest for ValidateOtpRequest {
     fn validate(&self) -> Result<(), ApiError> {
@@ -18,6 +21,10 @@ impl ValidateRequest for ValidateOtpRequest {
 
         if self.otp.len() != 6 {
             errors.push(ValidationErrorKind::InvalidOTPFormat("code".to_string()));
+        }
+
+        if self.pkce_verifier.len() < 43 || self.pkce_verifier.len() > 128 {
+            errors.push(ValidationErrorKind::InvalidPKCEVerifierFormat("pkce_verifier".to_string()));
         }
 
         if errors.len() > 0 {
@@ -45,13 +52,27 @@ pub async fn validate_otp(
             ApiError::InternalServerError
         })?;
 
+    let stored_pkce_challenge: String = r_conn.get(&format!("otp_pkce:{}", request.email)).map_err(|e| {
+        ApiError::InternalServerError
+    })?;
+
     if code != request.otp {
         return Err(ApiError::InvalidOTP)
+    }
+
+    let mut hasher = sha2::Sha256::new();
+    hasher.update(request.pkce_verifier.as_bytes());
+    let result = hasher.finalize();
+
+    let expected_pkce_challenge = URL_SAFE_NO_PAD.encode(&result);
+    if stored_pkce_challenge != expected_pkce_challenge {
+        return Err(ApiError::InvalidPKCE);
     }
 
     let tokens = generate_tokens(&user)?;
 
     r_conn.del(&format!("otp:{}", request.email))?;
+    r_conn.del(&format!("otp_pkce:{}", request.email))?;
 
     Ok(ValidateOtpResponse {
         tokens: Some(tokens),

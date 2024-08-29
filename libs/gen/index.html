@@ -289,6 +289,13 @@
                   <td><p>Unique user email address (validation: required, email) </p></td>
                 </tr>
               
+                <tr>
+                  <td>pkce_challenge</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>PKCE challenge (validation: required) </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -335,6 +342,13 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Unique user email address (validation: required, email) </p></td>
+                </tr>
+              
+                <tr>
+                  <td>pkce_challenge</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>PKCE challenge (validation: required) </p></td>
                 </tr>
               
             </tbody>
@@ -503,24 +517,10 @@
                 </tr>
               
                 <tr>
-                  <td>token_type</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>Token type (Bearer) </p></td>
-                </tr>
-              
-                <tr>
                   <td>expires_in</td>
                   <td><a href="#uint64">uint64</a></td>
                   <td></td>
                   <td><p>Token expiration time </p></td>
-                </tr>
-              
-                <tr>
-                  <td>user</td>
-                  <td><a href="#auth.User">User</a></td>
-                  <td></td>
-                  <td><p>User </p></td>
                 </tr>
               
             </tbody>
@@ -585,6 +585,13 @@
                   <td><p>Magic link code (validation: required) </p></td>
                 </tr>
               
+                <tr>
+                  <td>pkce_verifier</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>PKCE verifier (validation: required) </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -638,6 +645,13 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>OTP code (validation: required) </p></td>
+                </tr>
+              
+                <tr>
+                  <td>pkce_verifier</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>PKCE verifier (validation: required) </p></td>
                 </tr>
               
             </tbody>

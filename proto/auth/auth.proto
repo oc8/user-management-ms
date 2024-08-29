@@ -38,9 +38,7 @@ message User {
 message Tokens {
   string access_token = 1; /// Access token
   string refresh_token = 2; /// Refresh token
-  string token_type = 3; /// Token type (Bearer)
-  uint64 expires_in = 4; /// Token expiration time
-  User user = 5; /// User
+  uint64 expires_in = 3; /// Token expiration time
 }
 
 /**
@@ -57,6 +55,7 @@ message RegisterResponse {}
  */
 message GenerateOTPRequest {
   string email = 1; /// Unique user email address (validation: required, email)
+  string pkce_challenge = 2; /// PKCE challenge (validation: required)
 }
 
 /**
@@ -71,6 +70,7 @@ message GenerateOTPResponse {
  */
 message GenerateMagicLinkRequest {
   string email = 1; /// Unique user email address (validation: required, email)
+  string pkce_challenge = 2; /// PKCE challenge (validation: required)
 }
 
 /**
@@ -86,6 +86,7 @@ message GenerateMagicLinkResponse {
 message ValidateMagicLinkRequest {
   string email = 1; /// Unique user email address (validation: required, email)
   string code = 2; /// Magic link code (validation: required)
+  string pkce_verifier = 3; /// PKCE verifier (validation: required)
 }
 
 /**
@@ -101,6 +102,7 @@ message ValidateMagicLinkResponse {
 message ValidateOTPRequest {
   string email = 1; /// Unique user email address (validation: required, email)
   string otp = 2; /// OTP code (validation: required)
+  string pkce_verifier = 3; /// PKCE verifier (validation: required)
 }
 
 /**

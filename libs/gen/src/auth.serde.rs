@@ -10,9 +10,15 @@ impl serde::Serialize for GenerateMagicLinkRequest {
         if !self.email.is_empty() {
             len += 1;
         }
+        if !self.pkce_challenge.is_empty() {
+            len += 1;
+        }
         let mut struct_ser = serializer.serialize_struct("auth.GenerateMagicLinkRequest", len)?;
         if !self.email.is_empty() {
             struct_ser.serialize_field("email", &self.email)?;
+        }
+        if !self.pkce_challenge.is_empty() {
+            struct_ser.serialize_field("pkceChallenge", &self.pkce_challenge)?;
         }
         struct_ser.end()
     }
@@ -25,11 +31,14 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkRequest {
     {
         const FIELDS: &[&str] = &[
             "email",
+            "pkce_challenge",
+            "pkceChallenge",
         ];
 
         #[allow(clippy::enum_variant_names)]
         enum GeneratedField {
             Email,
+            PkceChallenge,
         }
         impl<'de> serde::Deserialize<'de> for GeneratedField {
             fn deserialize<D>(deserializer: D) -> std::result::Result<GeneratedField, D::Error>
@@ -52,6 +61,7 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkRequest {
                     {
                         match value {
                             "email" => Ok(GeneratedField::Email),
+                            "pkceChallenge" | "pkce_challenge" => Ok(GeneratedField::PkceChallenge),
                             _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
                         }
                     }
@@ -72,6 +82,7 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkRequest {
                     V: serde::de::MapAccess<'de>,
             {
                 let mut email__ = None;
+                let mut pkce_challenge__ = None;
                 while let Some(k) = map_.next_key()? {
                     match k {
                         GeneratedField::Email => {
@@ -80,10 +91,17 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkRequest {
                             }
                             email__ = Some(map_.next_value()?);
                         }
+                        GeneratedField::PkceChallenge => {
+                            if pkce_challenge__.is_some() {
+                                return Err(serde::de::Error::duplicate_field("pkceChallenge"));
+                            }
+                            pkce_challenge__ = Some(map_.next_value()?);
+                        }
                     }
                 }
                 Ok(GenerateMagicLinkRequest {
                     email: email__.unwrap_or_default(),
+                    pkce_challenge: pkce_challenge__.unwrap_or_default(),
                 })
             }
         }
@@ -192,9 +210,15 @@ impl serde::Serialize for GenerateOtpRequest {
         if !self.email.is_empty() {
             len += 1;
         }
+        if !self.pkce_challenge.is_empty() {
+            len += 1;
+        }
         let mut struct_ser = serializer.serialize_struct("auth.GenerateOTPRequest", len)?;
         if !self.email.is_empty() {
             struct_ser.serialize_field("email", &self.email)?;
+        }
+        if !self.pkce_challenge.is_empty() {
+            struct_ser.serialize_field("pkceChallenge", &self.pkce_challenge)?;
         }
         struct_ser.end()
     }
@@ -207,11 +231,14 @@ impl<'de> serde::Deserialize<'de> for GenerateOtpRequest {
     {
         const FIELDS: &[&str] = &[
             "email",
+            "pkce_challenge",
+            "pkceChallenge",
         ];
 
         #[allow(clippy::enum_variant_names)]
         enum GeneratedField {
             Email,
+            PkceChallenge,
         }
         impl<'de> serde::Deserialize<'de> for GeneratedField {
             fn deserialize<D>(deserializer: D) -> std::result::Result<GeneratedField, D::Error>
@@ -234,6 +261,7 @@ impl<'de> serde::Deserialize<'de> for GenerateOtpRequest {
                     {
                         match value {
                             "email" => Ok(GeneratedField::Email),
+                            "pkceChallenge" | "pkce_challenge" => Ok(GeneratedField::PkceChallenge),
                             _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
                         }
                     }
@@ -254,6 +282,7 @@ impl<'de> serde::Deserialize<'de> for GenerateOtpRequest {
                     V: serde::de::MapAccess<'de>,
             {
                 let mut email__ = None;
+                let mut pkce_challenge__ = None;
                 while let Some(k) = map_.next_key()? {
                     match k {
                         GeneratedField::Email => {
@@ -262,10 +291,17 @@ impl<'de> serde::Deserialize<'de> for GenerateOtpRequest {
                             }
                             email__ = Some(map_.next_value()?);
                         }
+                        GeneratedField::PkceChallenge => {
+                            if pkce_challenge__.is_some() {
+                                return Err(serde::de::Error::duplicate_field("pkceChallenge"));
+                            }
+                            pkce_challenge__ = Some(map_.next_value()?);
+                        }
                     }
                 }
                 Ok(GenerateOtpRequest {
                     email: email__.unwrap_or_default(),
+                    pkce_challenge: pkce_challenge__.unwrap_or_default(),
                 })
             }
         }
@@ -885,13 +921,7 @@ impl serde::Serialize for Tokens {
         if !self.refresh_token.is_empty() {
             len += 1;
         }
-        if !self.token_type.is_empty() {
-            len += 1;
-        }
         if self.expires_in != 0 {
-            len += 1;
-        }
-        if self.user.is_some() {
             len += 1;
         }
         let mut struct_ser = serializer.serialize_struct("auth.Tokens", len)?;
@@ -901,15 +931,9 @@ impl serde::Serialize for Tokens {
         if !self.refresh_token.is_empty() {
             struct_ser.serialize_field("refreshToken", &self.refresh_token)?;
         }
-        if !self.token_type.is_empty() {
-            struct_ser.serialize_field("tokenType", &self.token_type)?;
-        }
         if self.expires_in != 0 {
             #[allow(clippy::needless_borrow)]
             struct_ser.serialize_field("expiresIn", ToString::to_string(&self.expires_in).as_str())?;
-        }
-        if let Some(v) = self.user.as_ref() {
-            struct_ser.serialize_field("user", v)?;
         }
         struct_ser.end()
     }
@@ -925,20 +949,15 @@ impl<'de> serde::Deserialize<'de> for Tokens {
             "accessToken",
             "refresh_token",
             "refreshToken",
-            "token_type",
-            "tokenType",
             "expires_in",
             "expiresIn",
-            "user",
         ];
 
         #[allow(clippy::enum_variant_names)]
         enum GeneratedField {
             AccessToken,
             RefreshToken,
-            TokenType,
             ExpiresIn,
-            User,
         }
         impl<'de> serde::Deserialize<'de> for GeneratedField {
             fn deserialize<D>(deserializer: D) -> std::result::Result<GeneratedField, D::Error>
@@ -962,9 +981,7 @@ impl<'de> serde::Deserialize<'de> for Tokens {
                         match value {
                             "accessToken" | "access_token" => Ok(GeneratedField::AccessToken),
                             "refreshToken" | "refresh_token" => Ok(GeneratedField::RefreshToken),
-                            "tokenType" | "token_type" => Ok(GeneratedField::TokenType),
                             "expiresIn" | "expires_in" => Ok(GeneratedField::ExpiresIn),
-                            "user" => Ok(GeneratedField::User),
                             _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
                         }
                     }
@@ -986,9 +1003,7 @@ impl<'de> serde::Deserialize<'de> for Tokens {
             {
                 let mut access_token__ = None;
                 let mut refresh_token__ = None;
-                let mut token_type__ = None;
                 let mut expires_in__ = None;
-                let mut user__ = None;
                 while let Some(k) = map_.next_key()? {
                     match k {
                         GeneratedField::AccessToken => {
@@ -1003,12 +1018,6 @@ impl<'de> serde::Deserialize<'de> for Tokens {
                             }
                             refresh_token__ = Some(map_.next_value()?);
                         }
-                        GeneratedField::TokenType => {
-                            if token_type__.is_some() {
-                                return Err(serde::de::Error::duplicate_field("tokenType"));
-                            }
-                            token_type__ = Some(map_.next_value()?);
-                        }
                         GeneratedField::ExpiresIn => {
                             if expires_in__.is_some() {
                                 return Err(serde::de::Error::duplicate_field("expiresIn"));
@@ -1017,20 +1026,12 @@ impl<'de> serde::Deserialize<'de> for Tokens {
                                 Some(map_.next_value::<::pbjson::private::NumberDeserialize<_>>()?.0)
                             ;
                         }
-                        GeneratedField::User => {
-                            if user__.is_some() {
-                                return Err(serde::de::Error::duplicate_field("user"));
-                            }
-                            user__ = map_.next_value()?;
-                        }
                     }
                 }
                 Ok(Tokens {
                     access_token: access_token__.unwrap_or_default(),
                     refresh_token: refresh_token__.unwrap_or_default(),
-                    token_type: token_type__.unwrap_or_default(),
                     expires_in: expires_in__.unwrap_or_default(),
-                    user: user__,
                 })
             }
         }
@@ -1159,12 +1160,18 @@ impl serde::Serialize for ValidateMagicLinkRequest {
         if !self.code.is_empty() {
             len += 1;
         }
+        if !self.pkce_verifier.is_empty() {
+            len += 1;
+        }
         let mut struct_ser = serializer.serialize_struct("auth.ValidateMagicLinkRequest", len)?;
         if !self.email.is_empty() {
             struct_ser.serialize_field("email", &self.email)?;
         }
         if !self.code.is_empty() {
             struct_ser.serialize_field("code", &self.code)?;
+        }
+        if !self.pkce_verifier.is_empty() {
+            struct_ser.serialize_field("pkceVerifier", &self.pkce_verifier)?;
         }
         struct_ser.end()
     }
@@ -1178,12 +1185,15 @@ impl<'de> serde::Deserialize<'de> for ValidateMagicLinkRequest {
         const FIELDS: &[&str] = &[
             "email",
             "code",
+            "pkce_verifier",
+            "pkceVerifier",
         ];
 
         #[allow(clippy::enum_variant_names)]
         enum GeneratedField {
             Email,
             Code,
+            PkceVerifier,
         }
         impl<'de> serde::Deserialize<'de> for GeneratedField {
             fn deserialize<D>(deserializer: D) -> std::result::Result<GeneratedField, D::Error>
@@ -1207,6 +1217,7 @@ impl<'de> serde::Deserialize<'de> for ValidateMagicLinkRequest {
                         match value {
                             "email" => Ok(GeneratedField::Email),
                             "code" => Ok(GeneratedField::Code),
+                            "pkceVerifier" | "pkce_verifier" => Ok(GeneratedField::PkceVerifier),
                             _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
                         }
                     }
@@ -1228,6 +1239,7 @@ impl<'de> serde::Deserialize<'de> for ValidateMagicLinkRequest {
             {
                 let mut email__ = None;
                 let mut code__ = None;
+                let mut pkce_verifier__ = None;
                 while let Some(k) = map_.next_key()? {
                     match k {
                         GeneratedField::Email => {
@@ -1242,11 +1254,18 @@ impl<'de> serde::Deserialize<'de> for ValidateMagicLinkRequest {
                             }
                             code__ = Some(map_.next_value()?);
                         }
+                        GeneratedField::PkceVerifier => {
+                            if pkce_verifier__.is_some() {
+                                return Err(serde::de::Error::duplicate_field("pkceVerifier"));
+                            }
+                            pkce_verifier__ = Some(map_.next_value()?);
+                        }
                     }
                 }
                 Ok(ValidateMagicLinkRequest {
                     email: email__.unwrap_or_default(),
                     code: code__.unwrap_or_default(),
+                    pkce_verifier: pkce_verifier__.unwrap_or_default(),
                 })
             }
         }
@@ -1358,12 +1377,18 @@ impl serde::Serialize for ValidateOtpRequest {
         if !self.otp.is_empty() {
             len += 1;
         }
+        if !self.pkce_verifier.is_empty() {
+            len += 1;
+        }
         let mut struct_ser = serializer.serialize_struct("auth.ValidateOTPRequest", len)?;
         if !self.email.is_empty() {
             struct_ser.serialize_field("email", &self.email)?;
         }
         if !self.otp.is_empty() {
             struct_ser.serialize_field("otp", &self.otp)?;
+        }
+        if !self.pkce_verifier.is_empty() {
+            struct_ser.serialize_field("pkceVerifier", &self.pkce_verifier)?;
         }
         struct_ser.end()
     }
@@ -1377,12 +1402,15 @@ impl<'de> serde::Deserialize<'de> for ValidateOtpRequest {
         const FIELDS: &[&str] = &[
             "email",
             "otp",
+            "pkce_verifier",
+            "pkceVerifier",
         ];
 
         #[allow(clippy::enum_variant_names)]
         enum GeneratedField {
             Email,
             Otp,
+            PkceVerifier,
         }
         impl<'de> serde::Deserialize<'de> for GeneratedField {
             fn deserialize<D>(deserializer: D) -> std::result::Result<GeneratedField, D::Error>
@@ -1406,6 +1434,7 @@ impl<'de> serde::Deserialize<'de> for ValidateOtpRequest {
                         match value {
                             "email" => Ok(GeneratedField::Email),
                             "otp" => Ok(GeneratedField::Otp),
+                            "pkceVerifier" | "pkce_verifier" => Ok(GeneratedField::PkceVerifier),
                             _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
                         }
                     }
@@ -1427,6 +1456,7 @@ impl<'de> serde::Deserialize<'de> for ValidateOtpRequest {
             {
                 let mut email__ = None;
                 let mut otp__ = None;
+                let mut pkce_verifier__ = None;
                 while let Some(k) = map_.next_key()? {
                     match k {
                         GeneratedField::Email => {
@@ -1441,11 +1471,18 @@ impl<'de> serde::Deserialize<'de> for ValidateOtpRequest {
                             }
                             otp__ = Some(map_.next_value()?);
                         }
+                        GeneratedField::PkceVerifier => {
+                            if pkce_verifier__.is_some() {
+                                return Err(serde::de::Error::duplicate_field("pkceVerifier"));
+                            }
+                            pkce_verifier__ = Some(map_.next_value()?);
+                        }
                     }
                 }
                 Ok(ValidateOtpRequest {
                     email: email__.unwrap_or_default(),
                     otp: otp__.unwrap_or_default(),
+                    pkce_verifier: pkce_verifier__.unwrap_or_default(),
                 })
             }
         }

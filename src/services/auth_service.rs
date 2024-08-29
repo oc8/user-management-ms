@@ -145,11 +145,6 @@ pub(crate) fn generate_tokens(user: &User) -> Result<Tokens, ApiError> {
         access_token: access_token.token,
         refresh_token: refresh_token.token,
         expires_in: access_token.expires_in,
-        token_type: "Bearer".to_string(),
-        user: Option::from(UserProto {
-            id: user.id.to_string(),
-            email: user.email.clone(),
-        })
     })
 }
 

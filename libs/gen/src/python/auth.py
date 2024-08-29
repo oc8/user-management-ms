@@ -21,9 +21,7 @@ class Tokens(betterproto.Message):
 
     access_token: str = betterproto.string_field(1)
     refresh_token: str = betterproto.string_field(2)
-    token_type: str = betterproto.string_field(3)
-    expires_in: int = betterproto.uint64_field(4)
-    user: "User" = betterproto.message_field(5)
+    expires_in: int = betterproto.uint64_field(3)
 
 
 @dataclass
@@ -43,6 +41,7 @@ class GenerateOTPRequest(betterproto.Message):
     """* Used to generate an OTP code"""
 
     email: str = betterproto.string_field(1)
+    pkce_challenge: str = betterproto.string_field(2)
 
 
 @dataclass
@@ -57,6 +56,7 @@ class GenerateMagicLinkRequest(betterproto.Message):
     """* Used to generate a magic link"""
 
     email: str = betterproto.string_field(1)
+    pkce_challenge: str = betterproto.string_field(2)
 
 
 @dataclass
@@ -72,6 +72,7 @@ class ValidateMagicLinkRequest(betterproto.Message):
 
     email: str = betterproto.string_field(1)
     code: str = betterproto.string_field(2)
+    pkce_verifier: str = betterproto.string_field(3)
 
 
 @dataclass
@@ -87,6 +88,7 @@ class ValidateOTPRequest(betterproto.Message):
 
     email: str = betterproto.string_field(1)
     otp: str = betterproto.string_field(2)
+    pkce_verifier: str = betterproto.string_field(3)
 
 
 @dataclass
@@ -151,11 +153,14 @@ class AuthStub(betterproto.ServiceStub):
             RegisterResponse,
         )
 
-    async def generate_o_t_p(self, *, email: str = "") -> GenerateOTPResponse:
+    async def generate_o_t_p(
+        self, *, email: str = "", pkce_challenge: str = ""
+    ) -> GenerateOTPResponse:
         """/ Generate an OTP code"""
 
         request = GenerateOTPRequest()
         request.email = email
+        request.pkce_challenge = pkce_challenge
 
         return await self._unary_unary(
             "/auth.Auth/GenerateOTP",
@@ -164,12 +169,13 @@ class AuthStub(betterproto.ServiceStub):
         )
 
     async def generate_magic_link(
-        self, *, email: str = ""
+        self, *, email: str = "", pkce_challenge: str = ""
     ) -> GenerateMagicLinkResponse:
         """/ Generate a magic link"""
 
         request = GenerateMagicLinkRequest()
         request.email = email
+        request.pkce_challenge = pkce_challenge
 
         return await self._unary_unary(
             "/auth.Auth/GenerateMagicLink",
@@ -178,13 +184,14 @@ class AuthStub(betterproto.ServiceStub):
         )
 
     async def validate_magic_link(
-        self, *, email: str = "", code: str = ""
+        self, *, email: str = "", code: str = "", pkce_verifier: str = ""
     ) -> ValidateMagicLinkResponse:
         """/ Validate a magic link"""
 
         request = ValidateMagicLinkRequest()
         request.email = email
         request.code = code
+        request.pkce_verifier = pkce_verifier
 
         return await self._unary_unary(
             "/auth.Auth/ValidateMagicLink",
@@ -193,13 +200,14 @@ class AuthStub(betterproto.ServiceStub):
         )
 
     async def validate_o_t_p(
-        self, *, email: str = "", otp: str = ""
+        self, *, email: str = "", otp: str = "", pkce_verifier: str = ""
     ) -> ValidateOTPResponse:
         """/ Validate an OTP"""
 
         request = ValidateOTPRequest()
         request.email = email
         request.otp = otp
+        request.pkce_verifier = pkce_verifier
 
         return await self._unary_unary(
             "/auth.Auth/ValidateOTP",

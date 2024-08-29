@@ -22,6 +22,10 @@ pub enum ValidationErrorKind {
     InvalidRefreshTokenFormat(String),
     #[error("invalid magic code format, field: {0}")]
     InvalidMagicCodeFormat(String),
+    #[error("invalid pkce challenge format, field: {0}")]
+    InvalidPKCEChallengeFormat(String),
+    #[error("invalid pkce verifier format, field: {0}")]
+    InvalidPKCEVerifierFormat(String),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -72,6 +76,8 @@ pub enum ApiError {
     InvalidOTP,
     #[error("user not found")]
     UserNotFound,
+    #[error("invalid pkce")]
+    InvalidPKCE,
     #[error("validation error {0}")]
     ValidationError(List<ValidationErrorKind>),
 }

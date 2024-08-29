@@ -5,16 +5,27 @@ use protos::auth::{GenerateMagicLinkRequest, GenerateMagicLinkResponse};
 use crate::database::pg_database::PgPooledConnection;
 use crate::{generate_secret};
 use crate::errors::{ApiError, List, ValidationErrorKind};
+use crate::errors::ApiError::ValidationError;
 use crate::models::user::{UserRegister, UserRepository};
 use crate::validations::{ValidateRequest};
 
 impl ValidateRequest for GenerateMagicLinkRequest {
     fn validate(&self) -> Result<(), ApiError> {
-        if self.email.validate_email() {
-            Ok(())
-        } else {
-            Err(ApiError::ValidationError(List::<ValidationErrorKind>(vec![ValidationErrorKind::InvalidEmailFormat("email".to_string())])))
+        let mut errors = vec![];
+
+        if !self.email.validate_email() {
+            errors.push(ValidationErrorKind::InvalidEmailFormat("email".to_string()));
         }
+
+        if self.pkce_challenge.len() < 1 {
+            errors.push(ValidationErrorKind::InvalidPKCEChallengeFormat("pkce_challenge".to_string()));
+        }
+
+        if errors.len() > 0 {
+            return Err(ValidationError(List::<ValidationErrorKind>(errors)));
+        }
+
+        Ok(())
     }
 }
 
@@ -46,6 +57,12 @@ pub async fn generate_magic_link(
     r_conn.set_ex(
         &format!("magic:{}", email),
         &code,
+        otp_ttl,
+    )?;
+
+    r_conn.set_ex(
+        &format!("otp_pkce:{}", email),
+        request.pkce_challenge.clone(),
         otp_ttl,
     )?;
 
