@@ -48,7 +48,7 @@ class GenerateOTPRequest(betterproto.Message):
 class GenerateOTPResponse(betterproto.Message):
     """* Response to an OTP generation request"""
 
-    code: str = betterproto.string_field(1)
+    pass
 
 
 @dataclass

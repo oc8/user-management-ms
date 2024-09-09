@@ -190,3 +190,10 @@ impl From<RedisError> for ApiError {
         ApiError::InternalServerError
     }
 }
+
+impl From<lettre::transport::smtp::Error> for ApiError {
+    fn from(error: lettre::transport::smtp::Error) -> Self {
+        report_error(&error);
+        ApiError::InternalServerError
+    }
+}

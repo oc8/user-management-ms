@@ -61,9 +61,7 @@ message GenerateOTPRequest {
 /**
  * Response to an OTP generation request
  */
-message GenerateOTPResponse {
-  string code = 1; /// OTP code
-}
+message GenerateOTPResponse {}
 
 /**
  * Used to generate a magic link
@@ -76,9 +74,7 @@ message GenerateMagicLinkRequest {
 /**
  * Response to a magic link generation request
  */
-message GenerateMagicLinkResponse {
-  string code = 1; /// Magic link code
-}
+message GenerateMagicLinkResponse {}
 
 /**
  * Used to validate a magic link

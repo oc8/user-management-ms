@@ -6,7 +6,8 @@ use tokio::task::JoinHandle;
 use tonic::transport::{Certificate, Identity, Server, ServerTlsConfig};
 use protos::auth::auth_server::AuthServer;
 use crate::database::pg_database::PgPool;
-use crate::{create_socket_addr, report_error};
+use crate::{create_socket_addr, get_config, report_error};
+use crate::config::Config;
 use crate::services::auth_service::AuthService;
 
 pub struct TonicServer {
@@ -17,11 +18,12 @@ pub struct TonicServer {
 pub fn start_server(
     pool: Arc<PgPool>,
     cache: Arc<redis::Client>,
-    port: u16,
 ) -> Result<TonicServer, Box<dyn std::error::Error>> {
     let auth = AuthService { pool,  cache };
 
-    let (mut tonic_server, secure_mode) = match get_tls_config() {
+    let cfg = get_config!();
+
+    let (mut tonic_server, secure_mode) = match get_tls_config(cfg.tls_cert.clone(), cfg.tls_key.clone(), cfg.ca_cert.clone()) {
         Some(tls) => {
             info!("Configuring TLS...");
             match Server::builder().tls_config(tls) {
@@ -51,6 +53,7 @@ pub fn start_server(
         .add_service(reflect)
         .add_service(AuthServer::new(auth));
 
+    let port = cfg.port;
     let server = tokio::spawn(async move {
         let tonic_addr = create_socket_addr(port);
         info!("Starting server on port {}", port);
@@ -70,12 +73,8 @@ pub fn start_server(
     })
 }
 
-fn get_tls_config() -> Option<ServerTlsConfig> {
-    let cert = env::var("TLS_CERT").ok();
-    let key = env::var("TLS_KEY").ok();
-    let ca_cert = env::var("CA_CERT").ok();
-
-    match (cert, key, ca_cert) {
+fn get_tls_config(tls_cert: Option<String>, tls_key: Option<String>, ca_cert: Option<String>) -> Option<ServerTlsConfig> {
+    match (tls_cert, tls_key, ca_cert) {
         (Some(cert), Some(key), Some(ca_cert)) => {
             info!("Configuring TLS with custom CA...");
             Some(

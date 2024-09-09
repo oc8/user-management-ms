@@ -3,6 +3,7 @@ use jsonwebtoken::{decode, DecodingKey, Validation};
 use protos::auth::{ValidateTokenRequest, ValidateTokenResponse};
 use crate::errors::{ApiError, List, ValidationErrorKind};
 use crate::errors::ApiError::ValidationError;
+use crate::get_config;
 use crate::services::auth_service::Claims;
 use crate::validations::{ValidateRequest};
 
@@ -20,11 +21,11 @@ pub async fn validate_token(
     request: ValidateTokenRequest,
 ) -> Result<ValidateTokenResponse, ApiError> {
     request.validate()?;
+    let cfg = get_config!();
 
-    let secret = env::var("ACCESS_TOKEN_SECRET")?;
     decode::<Claims>(
         &request.access_token,
-        &DecodingKey::from_secret(secret.as_ref()),
+        &DecodingKey::from_secret(cfg.access_token_secret.as_ref()),
         &Validation::default()
     )?;
 

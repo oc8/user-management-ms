@@ -2,29 +2,21 @@ use std::env;
 use std::time::Duration;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
+use crate::config::Config;
 
 pub type PgPooledConnection = sqlx::pool::PoolConnection<Postgres>;
 pub type PgPool = Pool<Postgres>;
 
-pub async fn connect(database_url: &str) -> Result<PgPool, sqlx::Error> {
-    log::info!("Connecting to database: {}", database_url);
+pub async fn connect(cfg: &Config) -> Result<PgPool, sqlx::Error> {
+    log::info!("Connecting to database: {}", cfg.database_url);
 
     let pool = PgPoolOptions::new()
-        .min_connections(
-            env::var("DATABASE_MIN_CONNECTIONS")
-                .ok()
-                .and_then(|x| x.parse().ok())
-                .unwrap_or(0),
-        )
-        .max_connections(
-            env::var("DATABASE_MAX_CONNECTIONS")
-                .ok()
-                .and_then(|x| x.parse().ok())
-                .unwrap_or(16),
-        )
-        .max_lifetime(Some(Duration::from_secs(60 * 60)))
-        .connect(database_url)
+        .min_connections(cfg.database_min_connections)
+        .max_connections(cfg.database_max_connections)
+        .max_lifetime(Some(Duration::from_secs(cfg.database_max_lifetime)))
+        .connect(&cfg.database_url)
         .await?;
+
 
     Ok(pool)
 }
