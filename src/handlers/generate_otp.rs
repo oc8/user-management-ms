@@ -62,8 +62,8 @@ pub async fn generate_otp(
         cfg.otp_ttl,
     )?;
 
-    let from = format!("{} <{}>", cfg.email_from_name, cfg.email_from_email);
-    let to = format!("<{}>", user.email);
+    let from = format!("{} <{}>", cfg.email_from_name, cfg.email_from_email).as_str();
+    let to = format!("<{}>", user.email).as_str();
     let html = generate_otp_email(&code, &user.email, cfg.otp_ttl);
     let email = Message::builder()
         .from(from.parse().unwrap())
