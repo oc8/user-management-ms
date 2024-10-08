@@ -115,14 +115,8 @@ impl serde::Serialize for GenerateMagicLinkResponse {
         S: serde::Serializer,
     {
         use serde::ser::SerializeStruct;
-        let mut len = 0;
-        if !self.code.is_empty() {
-            len += 1;
-        }
-        let mut struct_ser = serializer.serialize_struct("auth.GenerateMagicLinkResponse", len)?;
-        if !self.code.is_empty() {
-            struct_ser.serialize_field("code", &self.code)?;
-        }
+        let len = 0;
+        let struct_ser = serializer.serialize_struct("auth.GenerateMagicLinkResponse", len)?;
         struct_ser.end()
     }
 }
@@ -133,12 +127,10 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkResponse {
         D: serde::Deserializer<'de>,
     {
         const FIELDS: &[&str] = &[
-            "code",
         ];
 
         #[allow(clippy::enum_variant_names)]
         enum GeneratedField {
-            Code,
         }
         impl<'de> serde::Deserialize<'de> for GeneratedField {
             fn deserialize<D>(deserializer: D) -> std::result::Result<GeneratedField, D::Error>
@@ -159,10 +151,7 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkResponse {
                     where
                         E: serde::de::Error,
                     {
-                        match value {
-                            "code" => Ok(GeneratedField::Code),
-                            _ => Err(serde::de::Error::unknown_field(value, FIELDS)),
-                        }
+                            Err(serde::de::Error::unknown_field(value, FIELDS))
                     }
                 }
                 deserializer.deserialize_identifier(GeneratedVisitor)
@@ -180,19 +169,10 @@ impl<'de> serde::Deserialize<'de> for GenerateMagicLinkResponse {
                 where
                     V: serde::de::MapAccess<'de>,
             {
-                let mut code__ = None;
-                while let Some(k) = map_.next_key()? {
-                    match k {
-                        GeneratedField::Code => {
-                            if code__.is_some() {
-                                return Err(serde::de::Error::duplicate_field("code"));
-                            }
-                            code__ = Some(map_.next_value()?);
-                        }
-                    }
+                while map_.next_key::<GeneratedField>()?.is_some() {
+                    let _ = map_.next_value::<serde::de::IgnoredAny>()?;
                 }
                 Ok(GenerateMagicLinkResponse {
-                    code: code__.unwrap_or_default(),
                 })
             }
         }

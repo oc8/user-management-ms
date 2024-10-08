@@ -19,6 +19,7 @@ pub struct Config {
     pub jwt_issuer: String,
     pub otp_secret: String,
     pub otp_ttl: u64,
+    pub magic_link_redirect_url: String,
     pub enable_ipv6: bool,
     pub port: u16,
     pub metrics_port: u16,

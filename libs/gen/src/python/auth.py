@@ -63,7 +63,7 @@ class GenerateMagicLinkRequest(betterproto.Message):
 class GenerateMagicLinkResponse(betterproto.Message):
     """* Response to a magic link generation request"""
 
-    code: str = betterproto.string_field(1)
+    pass
 
 
 @dataclass

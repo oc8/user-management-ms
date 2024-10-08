@@ -12,7 +12,7 @@ use crate::models::user::{UserRepository};
 use crate::validations::{ValidateRequest};
 use crate::errors::{ApiError, List, ValidationErrorKind};
 use crate::errors::ApiError::ValidationError;
-use crate::get_config;
+use crate::{get_config, report_error};
 use crate::models::mails::generate_otp_email;
 
 impl ValidateRequest for GenerateOtpRequest {
@@ -24,7 +24,7 @@ impl ValidateRequest for GenerateOtpRequest {
         }
 
         if self.pkce_challenge.len() < 1 {
-            errors.push(ValidationErrorKind::InvalidPKCEChallengeFormat("pkce_challenge".to_string()));
+            errors.push(ValidationErrorKind::InvalidPkceChallengeFormat("pkce_challenge".to_string()));
         }
 
         if errors.len() > 0 {
@@ -66,8 +66,12 @@ pub async fn generate_otp(
     let to = format!("<{}>", user.email);
     let html = generate_otp_email(&code, &user.email, cfg.otp_ttl);
     let email = Message::builder()
-        .from(from.as_str().parse().unwrap())
-        .to(to.as_str().parse().unwrap())
+        .from(from.parse().map_err(|e| {
+            log::error!("{}" ,e);
+            report_error(&e);
+            ApiError::InternalServerError
+        })?)
+        .to(to.parse().unwrap())
         .subject("Your Bookeat OTP code")
         .multipart(
             MultiPart::alternative()
