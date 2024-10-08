@@ -20,11 +20,11 @@ impl ValidateRequest for ValidateOtpRequest {
         }
 
         if self.otp.len() != 6 {
-            errors.push(ValidationErrorKind::InvalidOTPFormat("code".to_string()));
+            errors.push(ValidationErrorKind::InvalidOtpFormat("code".to_string()));
         }
 
         if self.pkce_verifier.len() < 43 || self.pkce_verifier.len() > 128 {
-            errors.push(ValidationErrorKind::InvalidPKCEVerifierFormat("pkce_verifier".to_string()));
+            errors.push(ValidationErrorKind::InvalidPkceVerifierFormat("pkce_verifier".to_string()));
         }
 
         if errors.len() > 0 {
@@ -47,7 +47,7 @@ pub async fn validate_otp(
     let code: String = r_conn.get(&format!("otp:{}", request.email))
         .map_err(|e| {
             if e.kind() == redis::ErrorKind::TypeError {
-                return ApiError::InvalidOTP
+                return ApiError::InvalidOtp
             }
             ApiError::InternalServerError
         })?;
@@ -57,7 +57,7 @@ pub async fn validate_otp(
     })?;
 
     if code != request.otp {
-        return Err(ApiError::InvalidOTP)
+        return Err(ApiError::InvalidOtp)
     }
 
     let mut hasher = sha2::Sha256::new();
@@ -66,7 +66,7 @@ pub async fn validate_otp(
 
     let expected_pkce_challenge = URL_SAFE_NO_PAD.encode(&result);
     if stored_pkce_challenge != expected_pkce_challenge {
-        return Err(ApiError::InvalidPKCE);
+        return Err(ApiError::InvalidPkce);
     }
 
     let tokens = generate_tokens(&user)?;

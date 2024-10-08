@@ -15,7 +15,7 @@ pub enum ValidationErrorKind {
     #[error("invalid email format, field: {0}")]
     InvalidEmailFormat(String),
     #[error("invalid otp format, field: {0}")]
-    InvalidOTPFormat(String),
+    InvalidOtpFormat(String),
     #[error("invalid token format, field: {0}")]
     InvalidTokenFormat(String),
     #[error("invalid refresh token format, field: {0}")]
@@ -23,9 +23,9 @@ pub enum ValidationErrorKind {
     #[error("invalid magic code format, field: {0}")]
     InvalidMagicCodeFormat(String),
     #[error("invalid pkce challenge format, field: {0}")]
-    InvalidPKCEChallengeFormat(String),
+    InvalidPkceChallengeFormat(String),
     #[error("invalid pkce verifier format, field: {0}")]
-    InvalidPKCEVerifierFormat(String),
+    InvalidPkceVerifierFormat(String),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -73,11 +73,11 @@ pub enum ApiError {
     #[error("invalid magic code")]
     InvalidMagicCode,
     #[error("invalid otp")]
-    InvalidOTP,
+    InvalidOtp,
     #[error("user not found")]
     UserNotFound,
     #[error("invalid pkce")]
-    InvalidPKCE,
+    InvalidPkce,
     #[error("validation error {0}")]
     ValidationError(List<ValidationErrorKind>),
 }
@@ -92,7 +92,7 @@ impl ApiError {
             ApiError::DatabaseError(_) => tonic::Code::Internal,
             ApiError::AlreadyExists(_) => tonic::Code::AlreadyExists,
             ApiError::NotFound(_) => tonic::Code::NotFound,
-            ApiError::InvalidOTP => tonic::Code::InvalidArgument,
+            ApiError::InvalidOtp => tonic::Code::InvalidArgument,
             ApiError::InvalidToken => tonic::Code::InvalidArgument,
             ApiError::InvalidRefreshToken => tonic::Code::InvalidArgument,
             ApiError::InvalidMagicCode => tonic::Code::InvalidArgument,
