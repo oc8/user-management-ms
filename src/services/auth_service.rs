@@ -16,7 +16,7 @@ use crate::database::pg_database::{PgPool, PgPooledConnection};
 use crate::errors::ApiError;
 use crate::handlers;
 
-const API_SLO: Objective = Objective::new("api")
+const API_SLO: Objective = Objective::new("auth_api")
     .success_rate(ObjectivePercentile::P99_9)
     .latency(ObjectiveLatency::Ms250, ObjectivePercentile::P99);
 
