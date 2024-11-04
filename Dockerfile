@@ -14,7 +14,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y libpq-dev libssl-dev pkg-config && rm -rf /var/lib/apt/lists/*
 
-RUN cargo install --version 0.7.4 sqlx-cli --no-default-features --features native-tls,postgres
+RUN cargo install --version 0.7.4 sqlx-cli --locked --no-default-features --features native-tls,postgres
 
 COPY --from=build /app/migrations ./migrations
 COPY --from=build /app/Makefile ./Makefile
