@@ -1,4 +1,4 @@
-FROM rust:1.77.2-slim-buster as build
+FROM rust:1.77.2-slim-bookworm as build
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ COPY . .
 
 RUN cargo build --release
 
-FROM rust:1.77.2-slim-buster
+FROM rust:1.77.2-slim-bookworm
 
 WORKDIR /app
 
